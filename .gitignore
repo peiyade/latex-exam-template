@@ -1,0 +1,10 @@
+.DS_Store
+.temp/
+.pytest_cache/
+*.log
+*.out
+*.aux
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
