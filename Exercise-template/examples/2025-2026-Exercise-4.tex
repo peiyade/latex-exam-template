@@ -1,0 +1,97 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+\title{高等数学A (二)}
+\author{}
+\Subject{作业}
+\Keywords{高等数学}
+
+% =================================================
+%       试卷头信息
+% =================================================
+\Year{2025--2026}
+\Semester{春季}
+\Course{高等数学A}
+\Time{}
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+\makehead
+
+\vspace{1cm}
+
+% =================================================
+%       选择题：空间曲线、二次曲面与柱面旋转面
+% =================================================
+\makepart{选择题}{每小题~4~分，共~16~分}
+
+\begin{problem}
+在空间直角坐标系中，方程组
+\[
+\begin{cases}
+x^2+y^2+z^2=4,\\
+z=1
+\end{cases}
+\]
+表示的图形是\pickout{B}
+\options
+{一个点}
+{一条空间曲线}
+{一个平面}
+{一个球面}
+\end{problem}
+\begin{note}
+空间曲线的一般方程可由两个空间曲面方程联立给出。此处 $z=1$ 是平面，$x^2+y^2+z^2=4$ 是球面，二者相交得到一个圆（属于空间曲线）。
+\end{note}
+\bigskip
+
+\begin{problem}
+方程 $\dfrac{x^2}{4}+\dfrac{y^2}{9}-\dfrac{z^2}{16}=1$ 所表示的二次曲面是\pickout{B}
+\options
+{椭球面}
+{单叶双曲面}
+{双叶双曲面}
+{椭圆抛物面}
+\end{problem}
+\begin{note}
+二次曲面的一般分类中，等号左边为两正一负的标准形式对应单叶双曲面；若为一正两负则为双叶双曲面；全正则对应椭球面。
+\end{note}
+\bigskip
+
+\begin{problem}
+xOy 平面上的椭圆 $\dfrac{x^2}{4}+\dfrac{y^2}{9}=1$ 绕 $x$ 轴旋转一周所得的旋转曲面方程为\pickout{B}
+\options
+{$\dfrac{x^2}{4}+\dfrac{y^2}{9}=1$}
+{$\dfrac{x^2}{4}+\dfrac{y^2+z^2}{9}=1$}
+{$\dfrac{x^2+y^2}{4}+\dfrac{z^2}{9}=1$}
+{$\dfrac{x^2}{4}+\dfrac{y^2}{9}+\dfrac{z^2}{9}=1$}
+\end{problem}
+\begin{note}
+曲线绕 $x$ 轴旋转时，将原方程中的 $y$ 替换为 $\pm\sqrt{y^2+z^2}$，即 $y^2$ 替换为 $y^2+z^2$，从而得到旋转曲面方程。
+\end{note}
+\bigskip
+
+\begin{problem}
+方程 $x^2+2z^2=4$ 在空间直角坐标系中表示\pickout{C}
+\options
+{椭球面}
+{椭圆（平面曲线）}
+{椭圆柱面，母线平行于 $y$ 轴}
+{椭圆柱面，母线平行于 $z$ 轴}
+\end{problem}
+\begin{note}
+柱面方程的特征是缺少某一个坐标变量。方程 $x^2+2z^2=4$ 中不含 $y$，说明该曲面由 xOz 平面上的椭圆沿 $y$ 轴方向平移生成，因此是母线平行于 $y$ 轴的椭圆柱面。
+\end{note}
+\bigskip
+
+\end{document}

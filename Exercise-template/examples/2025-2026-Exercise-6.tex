@@ -1,0 +1,182 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+\title{高等数学A (二)}
+\author{}
+\Subject{作业}
+\Keywords{高等数学, 多元函数微分学, 几何应用}
+
+% =================================================
+%       试卷头信息
+% =================================================
+\Year{2025--2026}
+\Semester{春季}
+\Course{高等数学A}
+\Time{}
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+\makehead
+
+\vspace{1cm}
+
+% =================================================
+%       选择题
+% =================================================
+\makepart{选择题}{每小题~4~分，共~16~分}
+
+\begin{problem}
+函数 $f(x,y)$ 在点 $(x_0,y_0)$ 处沿方向 $\vec{l}$ 的方向导数取最大值时，$\vec{l}$ 的方向为\pickout{B}
+\options
+{任意方向}
+{梯度的方向}
+{梯度的反方向}
+{等值线的切线方向}
+\end{problem}
+\begin{note}
+方向导数 $f_{\vec{l}}=\nabla f\cdot\vec{l}^{\kern1pt0}$ 在内积取最大值时等于 $|\nabla f|$，此时单位向量 $\vec{l}^{\kern1pt0}$ 与梯度 $\nabla f$ 同向。
+\end{note}
+\bigskip
+
+\begin{problem}
+曲面 $F(x,y,z)=0$ 在点 $(x_0,y_0,z_0)$ 处的一个法向量为\pickout{A}
+\options
+{$(F_x,F_y,F_z)\big|_{P_0}$}
+{$(F_x,F_y,-1)\big|_{P_0}$}
+{$(z_x,z_y,-1)\big|_{P_0}$}
+{$(1,1,1)$}
+\end{problem}
+\begin{note}
+曲面 $F(x,y,z)=0$ 在一点的梯度 $\nabla F=(F_x,F_y,F_z)$ 即为曲面在该点的一个法向量。
+\end{note}
+\bigskip
+
+\begin{problem}
+空间曲线 $\varGamma:x=x(t),\,y=y(t),\,z=z(t)$ 在点 $t=t_0$ 处的切向量可取为\pickout{B}
+\options
+{$(x(t_0),y(t_0),z(t_0))$}
+{$(x'(t_0),y'(t_0),z'(t_0))$}
+{$(x''(t_0),y''(t_0),z''(t_0))$}
+{$(x'(t_0),0,0)$}
+\end{problem}
+\begin{note}
+空间曲线以参数方程给出时，切向量 $\vec{T}$ 的分量为各坐标函数对参数的导数，即 $\vec{T}=(x'(t),y'(t),z'(t))$。
+\end{note}
+\bigskip
+
+\begin{problem}
+设 $f(x,y)$ 在点 $P_0$ 可微，$\vec{l}^{\kern1pt0}$ 为给定的单位方向向量，则方向导数 $\dfrac{\partial f}{\partial l}\Big|_{P_0}$ 的计算公式为\pickout{C}
+\options
+{$\nabla f(P_0)\cdot\vec{l}$，其中 $\vec{l}$ 为任意方向向量}
+{$|\nabla f(P_0)|\cos\theta$}
+{$\nabla f(P_0)\cdot\vec{l}^{\kern1pt0}$}
+{$\nabla f(P_0)\times\vec{l}^{\kern1pt0}$}
+\end{problem}
+\begin{note}
+方向导数定义为 $f_{\vec{l}}=\nabla f\cdot\vec{l}^{\kern1pt0}$，其中 $\vec{l}^{\kern1pt0}$ 必须是单位向量。若方向向量 $\vec{l}$ 非单位，需先将其单位化。
+\end{note}
+\bigskip
+
+% =================================================
+%       简答题
+% =================================================
+\makepart{简答题}{共~3~题，满分~34~分}
+
+\begin{problem}
+求空间曲线
+\[
+x=t,\quad y=t^2,\quad z=t^3
+\]
+在 $t=1$ 处的切线方程和法平面方程。
+\end{problem}
+
+\begin{solution}
+切点坐标：$(1,1,1)$。
+
+求导得切向量：
+\[
+\vec{T}=(x'(t),y'(t),z'(t))=(1,\,2t,\,3t^2)\;\xrightarrow{t=1}\;(1,2,3).
+\]
+
+切线方程（点向式）：
+\[
+\frac{x-1}{1}=\frac{y-1}{2}=\frac{z-1}{3}.
+\]
+
+法平面方程（切向量即法平面的法向量）：
+\[
+1\cdot(x-1)+2\cdot(y-1)+3\cdot(z-1)=0
+\;\Longrightarrow\; x+2y+3z=6.
+\]
+\end{solution}
+\bigskip
+
+\begin{problem}
+求曲面 $z=x^2+y^2$ 在点 $(1,1,2)$ 处的切平面方程和法线方程。
+\end{problem}
+
+\begin{solution}
+令 $F(x,y,z)=x^2+y^2-z=0$，则
+\[
+F_x=2x,\quad F_y=2y,\quad F_z=-1.
+\]
+
+在点 $(1,1,2)$ 处，法向量
+\[
+\vec{n}=(F_x,F_y,F_z)\big|_{(1,1,2)}=(2,2,-1).
+\]
+
+切平面方程：
+\[
+2(x-1)+2(y-1)-(z-2)=0 \;\Longrightarrow\; 2x+2y-z=2.
+\]
+
+法线方程（点向式）：
+\[
+\frac{x-1}{2}=\frac{y-1}{2}=\frac{z-2}{-1}.
+\]
+\end{solution}
+\bigskip
+
+\begin{problem}
+求函数 $f(x,y,z)=xy+yz+zx$ 在点 $P_0(1,1,1)$ 处的梯度，并求函数在该点沿方向 $\vec{l}=(1,1,1)$ 的方向导数。
+\end{problem}
+
+\begin{solution}
+先求偏导数：
+\[
+f_x=y+z,\quad f_y=x+z,\quad f_z=x+y.
+\]
+
+在 $P_0(1,1,1)$ 处：
+\[
+\nabla f(P_0)=(f_x,f_y,f_z)\big|_{P_0}=(2,2,2).
+\]
+
+$\vec{l}=(1,1,1)$ 的单位向量：
+\[
+\vec{l}^{\kern1pt0}=\frac{(1,1,1)}{\sqrt{1^2+1^2+1^2}}
+=\Bigl(\frac{1}{\sqrt{3}},\;\frac{1}{\sqrt{3}},\;\frac{1}{\sqrt{3}}\Bigr).
+\]
+
+方向导数：
+\[
+\frac{\partial f}{\partial l}\Big|_{P_0}
+=\nabla f(P_0)\cdot\vec{l}^{\kern1pt0}
+=2\cdot\frac{1}{\sqrt{3}}+2\cdot\frac{1}{\sqrt{3}}+2\cdot\frac{1}{\sqrt{3}}
+=\frac{6}{\sqrt{3}}=2\sqrt{3}.
+\]
+\end{solution}
+\bigskip
+
+\end{document}

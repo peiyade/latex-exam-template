@@ -1,0 +1,275 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+\title{高等数学A (二)}
+\author{}
+\Subject{作业}
+\Keywords{高等数学}
+
+% =================================================
+%       试卷头信息
+% =================================================
+\Year{2025--2026}
+\Semester{春季}
+\Course{高等数学A}
+\Time{}
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+\makehead
+
+\vspace{1cm}
+
+% =================================================
+%       选择题
+% =================================================
+\makepart{选择题}{每小题~4~分，共~44~分}
+
+\begin{problem}
+已知 $\vec{a}=(1,2,-1)$, $\vec{b}=(2,0,1)$，则 $2\vec{a}-\vec{b}=$
+\pickout{A}
+\options
+{$(0,4,-3)$}
+{$(4,4,-1)$}
+{$(0,4,3)$}
+{$(4,4,1)$}
+\end{problem}
+\begin{note}
+向量的线性运算：$2\vec{a}=(2,4,-2)$，故 $2\vec{a}-\vec{b}=(2-2,4-0,-2-1)=(0,4,-3)$。
+\end{note}
+\bigskip
+
+\begin{problem}
+已知 $\vec{a}=(1,-1,2)$, $\vec{b}=(2,1,1)$，则 $\vec{a}\cdot\vec{b}=$
+\pickout{D}
+\options
+{$-1$}
+{$0$}
+{$1$}
+{$3$}
+\end{problem}
+\begin{note}
+数量积（内积）：$\vec{a}\cdot\vec{b}=1\times2+(-1)\times1+2\times1=2-1+2=3$。
+\end{note}
+\bigskip
+
+\begin{problem}
+已知 $\vec{a}=(1,0,1)$, $\vec{b}=(0,1,1)$, $\vec{c}=(1,1,1)$，则 $(\vec{a}\times\vec{b})\cdot\vec{c}=$
+\pickout{B}
+\options
+{$-2$}
+{$-1$}
+{$0$}
+{$1$}
+\end{problem}
+\begin{note}
+混合积可用三阶行列式计算：$(\vec{a}\times\vec{b})\cdot\vec{c}=\begin{vmatrix}1&0&1\\0&1&1\\1&1&1\end{vmatrix}=1(1-1)-0+1(0-1)=-1$。
+\end{note}
+\bigskip
+
+\begin{problem}
+已知 $\vec{a}=(1,-1,2)$, $\vec{b}=(3,1,k)$，若 $\vec{a}\perp\vec{b}$，则 $k=$
+\pickout{C}
+\options
+{$1$}
+{$0$}
+{$-1$}
+{$-2$}
+\end{problem}
+\begin{note}
+两向量垂直的充要条件是数量积为零：$\vec{a}\cdot\vec{b}=3-1+2k=0$，解得 $k=-1$。
+\end{note}
+\bigskip
+
+\begin{problem}
+平面 $2x-3y+z+6=0$ 的一个法向量是\pickout{C}
+\options
+{$(2,3,1)$}
+{$(2,-3,-1)$}
+{$(-2,3,-1)$}
+{以上都不是}
+\end{problem}
+\begin{note}
+平面的法向量为 $(2,-3,1)$，而 $(-2,3,-1)=-1\cdot(2,-3,1)$ 是其非零常数倍，故为法向量。
+\end{note}
+\bigskip
+
+\begin{problem}
+直线 $\dfrac{x-1}{2}=\dfrac{y+1}{-1}=\dfrac{z}{3}$ 与平面 $2x-y+3z-5=0$ 的位置关系是\pickout{B}
+\options
+{平行}
+{垂直}
+{斜交}
+{直线在平面上}
+\end{problem}
+\begin{note}
+直线的方向向量 $s=(2,-1,3)$，平面的法向量 $n=(2,-1,3)$，两者平行，故直线垂直于平面。
+\end{note}
+\bigskip
+
+\begin{problem}
+点 $(1,2,1)$ 到平面 $x+2y-2z+3=0$ 的距离为\pickout{B}
+\options
+{$1$}
+{$2$}
+{$3$}
+{$4$}
+\end{problem}
+\begin{note}
+距离公式 $d=\dfrac{|1+4-2+3|}{\sqrt{1+4+4}}=\dfrac{6}{3}=2$。
+\end{note}
+\bigskip
+
+\begin{problem}
+空间曲线的一般方程可以用\pickout{B}
+\options
+{一个三元方程 $F(x,y,z)=0$}
+{两个三元方程联立 $\left\{\begin{array}{l}F(x,y,z)=0,\\ G(x,y,z)=0\end{array}\right.$}
+{参数方程 $x=x(t),\ y=y(t)$}
+{以上都不是}
+\end{problem}
+\begin{note}
+空间曲线可视为两个空间曲面的交线，因此其一般方程由形成该交线的两个曲面方程联立给出。
+\end{note}
+\bigskip
+
+\begin{problem}
+方程 $\dfrac{x^2}{4}+\dfrac{y^2}{9}+\dfrac{z^2}{16}=1$ 表示的二次曲面是\pickout{A}
+\options
+{椭球面}
+{单叶双曲面}
+{双叶双曲面}
+{椭圆抛物面}
+\end{problem}
+\begin{note}
+标准形式 $\dfrac{x^2}{a^2}+\dfrac{y^2}{b^2}+\dfrac{z^2}{c^2}=1$（$a,b,c>0$）为椭球面。
+\end{note}
+\bigskip
+
+\begin{problem}
+$xOy$ 平面上的椭圆 $\dfrac{x^2}{4}+\dfrac{y^2}{9}=1$ 绕 $x$ 轴旋转一周所得曲面的方程为\pickout{A}
+\options
+{$\dfrac{x^2}{4}+\dfrac{y^2+z^2}{9}=1$}
+{$\dfrac{x^2+y^2}{4}+\dfrac{z^2}{9}=1$}
+{$\dfrac{x^2}{4}+\dfrac{(y+z)^2}{9}=1$}
+{以上都不是}
+\end{problem}
+\begin{note}
+绕 $x$ 轴旋转时，将 $y$ 替换为 $\pm\sqrt{y^2+z^2}$，即 $y^2$ 替换为 $y^2+z^2$，得旋转曲面方程 $\dfrac{x^2}{4}+\dfrac{y^2+z^2}{9}=1$。
+\end{note}
+\bigskip
+
+\begin{problem}
+方程 $x^2+z^2=1$ 表示\pickout{B}
+\options
+{母线平行于 $x$ 轴的圆柱面}
+{母线平行于 $y$ 轴的圆柱面}
+{母线平行于 $z$ 轴的圆柱面}
+{不是柱面}
+\end{problem}
+\begin{note}
+方程 $x^2+z^2=1$ 中不含 $y$，表示在 $xOz$ 平面上的圆 $x^2+z^2=1$ 沿 $y$ 轴方向平移所形成的柱面，故母线平行于 $y$ 轴。
+\end{note}
+\bigskip
+
+% =================================================
+%       填空题
+% =================================================
+\makepart{填空题}{每小题~4~分，共~20~分}
+
+\begin{problem}
+平面 $3x+2y-z-6=0$ 在 $x$ 轴上的截距为 \fillin{$2$} 。
+\end{problem}
+\begin{note}
+令 $y=z=0$，得 $3x=6$，故 $x=2$。
+\end{note}
+\bigskip
+
+\begin{problem}
+过点 $(1,-1,2)$ 且与平面 $2x+y-z+1=0$ 平行的平面方程为 $2x+y-z+$ \fillin{$1$} $=0$。
+\end{problem}
+\begin{note}
+设平面为 $2x+y-z+D=0$，代入点 $(1,-1,2)$ 得 $2-1-2+D=0$，$D=1$。
+\end{note}
+\bigskip
+
+\begin{problem}
+直线 $\left\{\begin{array}{l}x+2y-z=0,\\ 2x-y+z=0\end{array}\right.$ 的方向向量的 $x$ 分量为 \fillin{$1$} 。
+\end{problem}
+\begin{note}
+方向向量 $s=(1,2,-1)\times(2,-1,1)=(1,-3,-5)$，$x$ 分量为 $1$（或其非零整数倍）。
+\end{note}
+\bigskip
+
+\begin{problem}
+平面 $x+y+z=1$ 与平面 $2x+2y+2z=3$ 的夹角为 \fillin{$0$}°。
+\end{problem}
+\begin{note}
+两平面法向量分别为 $(1,1,1)$ 与 $(2,2,2)$，两者平行，故夹角为 $0^\circ$。
+\end{note}
+\bigskip
+
+\begin{problem}
+点 $(5,2,1)$ 到平面 $2x+2y+z-9=0$ 的距离为 \fillin{$2$} 。
+\end{problem}
+\begin{note}
+距离公式 $d=\dfrac{|10+4+1-9|}{\sqrt{4+4+1}}=\dfrac{6}{3}=2$。
+\end{note}
+\bigskip
+
+% =================================================
+%       解答题
+% =================================================
+\newpage
+\makepart{解答题}{本题~10~分}
+
+\begin{problem}
+求过点 $(1,0,-1)$ 且与两直线
+\[
+L_1:\left\{\begin{array}{l}x+y-z=0,\\ x-y+z=0,\end{array}\right.
+\quad
+L_2:\left\{\begin{array}{l}x+y+z=0,\\ x-y=0\end{array}\right.
+\]
+都平行的平面的方程。
+\end{problem}
+\begin{note}
+先分别求出两直线的方向向量，再用叉乘得到平面的法向量，最后写出点法式方程。
+\end{note}
+\begin{solution}
+直线 $L_1$ 的方向向量
+\[
+s_1=(1,1,-1)\times(1,-1,1)=(0,-2,-2),
+\]
+可取 $s_1=(0,1,1)$。
+
+直线 $L_2$ 的方向向量
+\[
+s_2=(1,1,1)\times(1,-1,0)=(1,1,-2).
+\]
+
+所求平面与 $L_1,L_2$ 都平行，故其法向量 $n$ 与 $s_1,s_2$ 均垂直：
+\[
+n=s_1\times s_2=(0,1,1)\times(1,1,-2)=(-3,1,-1).
+\]
+
+由点法式方程，过点 $(1,0,-1)$ 的平面为
+\[
+-3(x-1)+1\cdot(y-0)-1\cdot(z+1)=0,
+\]
+整理得
+\[
+\boxed{3x-y+z-2=0}.
+\]
+\end{solution}
+
+\end{document}

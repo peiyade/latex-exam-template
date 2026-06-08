@@ -1,0 +1,172 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+\title{高等数学A 练习}
+\author{}
+\Subject{作业}
+\Keywords{高等数学}
+
+% =================================================
+%       试卷头信息
+% =================================================
+\Year{2024--2025}
+\Semester{秋季}
+\Course{高等数学A}
+\Time{}
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+\makehead
+
+\vspace{1cm}
+
+% =================================================
+%       选择题示例
+% =================================================
+\makepart{选择题}{每小题 4 分，共 12 分}
+
+\begin{problem}
+设函数 $f(x)$ 在点 $x_0$ 处可导，则下列极限中等于 $f'(x_0)$ 的是\pickout{C}
+\options
+{$\displaystyle\lim_{h\to 0}\frac{f(x_0+2h)-f(x_0)}{h}$}
+{$\displaystyle\lim_{h\to 0}\frac{f(x_0+h)-f(x_0-h)}{h}$}
+{$\displaystyle\lim_{h\to 0}\frac{f(x_0+h)-f(x_0)}{h}$}
+{$\displaystyle\lim_{h\to 0}\frac{f(x_0)-f(x_0-h)}{2h}$}
+\end{problem}
+\begin{note}
+根据导数的定义：$f'(x_0)=\displaystyle\lim_{h\to 0}\frac{f(x_0+h)-f(x_0)}{h}$，因此选项 C 正确。
+\end{note}
+\bigskip
+
+\begin{problem}
+若 $f(x)$ 在 $[a,b]$ 上连续，在 $(a,b)$ 内可导，且 $f(a)=f(b)$，则\pickout{B}
+\options
+{$f(x)$ 在 $[a,b]$ 上单调递增}
+{存在 $\xi\in(a,b)$，使得 $f'(\xi)=0$}
+{$f(x)$ 在 $[a,b]$ 上为常数}
+{对任意 $x\in(a,b)$，有 $f'(x)=0$}
+\end{problem}
+\begin{note}
+这是罗尔(Rolle)定理的内容：若函数满足三个条件，则至少存在一点导数为零。
+\end{note}
+\bigskip
+
+\begin{problem}
+函数 $y=x^3-3x^2+1$ 的极小值点是\pickout{A}
+\options
+{$x=2$}
+{$x=0$}
+{$x=1$}
+{$x=-1$}
+\end{problem}
+\bigskip
+
+% =================================================
+%       填空题示例
+% =================================================
+\makepart{填空题}{每小题 4 分，共 12 分}
+
+\begin{problem}
+设 $y=\ln(1+x^2)$，则 $\mathrm{d}y=$\fillin{$\dfrac{2x}{1+x^2}\mathrm{d}x$}。
+\end{problem}
+\begin{note}
+复合函数求导：$y'=\frac{1}{1+x^2}\cdot 2x = \frac{2x}{1+x^2}$。
+\end{note}
+\bigskip
+
+\begin{problem}
+计算定积分 $\displaystyle\int_0^1 x^2\,\mathrm{d}x = $ \fillin{$\dfrac{1}{3}$}。
+\end{problem}
+\bigskip
+
+\begin{problem}
+曲线 $y=x^2$ 在点 \fillin{$(1,1)$} 处的切线方程为 $y=2x-1$。
+\end{problem}
+\begin{note}
+先求导数 $y'=2x$，在 $x=1$ 处斜率为 $2$，切线方程为 $y-1=2(x-1)$，即 $y=2x-1$。
+\end{note}
+\bigskip
+
+% =================================================
+%       解答题示例
+% =================================================
+\newpage
+\makepart{解答题}{每小题 10 分，共 30 分}
+
+\begin{problem}
+求函数 $f(x)=x^3-3x+1$ 的单调区间和极值。
+\end{problem}
+\begin{note}
+求极值的步骤：1) 求导数；2) 找临界点；3) 判断单调性；4) 确定极值。
+\end{note}
+\begin{solution}
+首先求导数：
+$$f'(x) = 3x^2 - 3 = 3(x^2-1) = 3(x+1)(x-1)$$
+
+令 $f'(x)=0$，得临界点 $x=-1$ 和 $x=1$。
+
+分析单调性：
+\begin{itemize}
+    \item 当 $x<-1$ 时，$f'(x)>0$，函数单调递增；
+    \item 当 $-1<x<1$ 时，$f'(x)<0$，函数单调递减；
+    \item 当 $x>1$ 时，$f'(x)>0$，函数单调递增。
+\end{itemize}
+
+因此：
+\begin{itemize}
+    \item 单调递增区间：$(-\infty,-1)$ 和 $(1,+\infty)$
+    \item 单调递减区间：$(-1,1)$
+    \item 极大值：$f(-1)=(-1)^3-3(-1)+1=3$
+    \item 极小值：$f(1)=1-3+1=-1$
+\end{itemize}
+\end{solution}
+\bigskip
+
+\begin{problem}
+计算不定积分 $\displaystyle\int x\sin x\,\mathrm{d}x$。
+\end{problem}
+\begin{note}
+使用分部积分法：$\int u\,\mathrm{d}v = uv - \int v\,\mathrm{d}u$。
+\end{note}
+\begin{solution}
+使用分部积分法，设：
+$$u = x, \quad \mathrm{d}v = \sin x\,\mathrm{d}x$$
+则：
+$$\mathrm{d}u = \mathrm{d}x, \quad v = -\cos x$$
+
+代入分部积分公式：
+$$\int x\sin x\,\mathrm{d}x = -x\cos x - \int(-\cos x)\,\mathrm{d}x$$
+$$= -x\cos x + \int\cos x\,\mathrm{d}x$$
+$$= -x\cos x + \sin x + C$$
+\end{solution}
+\bigskip
+
+\begin{problem}
+求曲线 $y=x^2$ 与直线 $y=x$ 所围成的平面图形的面积。
+\end{problem}
+\begin{note}
+先求交点确定积分限，再用定积分计算面积。
+\end{note}
+\begin{solution}
+求交点：解方程组
+$$\begin{cases} y = x^2 \\ y = x \end{cases}$$
+得 $x^2=x$，即 $x(x-1)=0$，所以 $x=0$ 或 $x=1$。
+
+在区间 $[0,1]$ 上，$x \geq x^2$，因此面积为：
+$$S = \int_0^1 (x-x^2)\,\mathrm{d}x$$
+$$= \left[\frac{x^2}{2}-\frac{x^3}{3}\right]_0^1$$
+$$= \left(\frac{1}{2}-\frac{1}{3}\right) - 0$$
+$$= \frac{1}{6}$$
+\end{solution}
+
+\end{document}

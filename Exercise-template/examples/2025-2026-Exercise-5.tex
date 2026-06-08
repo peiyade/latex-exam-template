@@ -1,0 +1,255 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+\title{高等数学A (二)}
+\author{}
+\Subject{作业}
+\Keywords{高等数学, 多元函数微分学}
+
+% =================================================
+%       试卷头信息
+% =================================================
+\Year{2025--2026}
+\Semester{春季}
+\Course{高等数学A}
+\Time{}
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+\makehead
+
+\vspace{1cm}
+
+% =================================================
+%       简答题
+% =================================================
+\makepart{简答题}{每题~20~分，共~100~分}
+
+% =================================================
+% 第一题：定义域
+% =================================================
+\begin{problem}
+求下列二元函数的定义域：
+\begin{enumerate}
+\item $z=\ln(y^2-2x+1)$；
+\item $z=\arcsin\dfrac{x^2+y^2}{4}+\dfrac{1}{\sqrt{x-y}}$。
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item 对数函数要求真数大于零：
+\[
+y^2-2x+1>0 \;\Longrightarrow\; 2x<y^2+1 \;\Longrightarrow\; x<\frac{y^2+1}{2}.
+\]
+故定义域为 $D=\left\{(x,y)\;\middle|\;x<\dfrac{y^2+1}{2}\right\}$。
+
+\item 反正弦要求 $\bigl|\frac{x^2+y^2}{4}\bigr|\leqslant 1$，且分母 $\sqrt{x-y}>0$：
+\[
+\begin{cases}
+x^2+y^2\leqslant 4,\\[2pt]
+x-y>0,
+\end{cases}
+\;\Longrightarrow\;
+\begin{cases}
+x^2+y^2\leqslant 4,\\
+x>y.
+\end{cases}
+\]
+故定义域为 $D=\left\{(x,y)\mid x^2+y^2\leqslant 4,\;x>y\right\}$。
+\end{enumerate}
+\end{solution}
+\bigskip
+
+% =================================================
+% 第二题：二元/三元偏导
+% =================================================
+\begin{problem}
+求下列函数的偏导数：
+\begin{enumerate}
+\item 设 $z=e^{xy}\sin(x+y)$，求 $\dfrac{\partial z}{\partial x}$，$\dfrac{\partial z}{\partial y}$；
+\item 设 $z=\ln(x^2+\sin y)$，求 $\dfrac{\partial z}{\partial x}$，$\dfrac{\partial z}{\partial y}$；
+\item 设 $u=\sin(xyz)+e^{x+y-z}$，求 $\dfrac{\partial u}{\partial x}$，$\dfrac{\partial u}{\partial y}$，$\dfrac{\partial u}{\partial z}$；
+\item 设 $u=\ln(x+y^2+e^z)$，求 $\dfrac{\partial u}{\partial x}$，$\dfrac{\partial u}{\partial y}$，$\dfrac{\partial u}{\partial z}$。
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item 对 $x$ 求偏导（$y$ 视为常数）：
+\[
+\frac{\partial z}{\partial x}=e^{xy}\cdot y\cdot\sin(x+y)+e^{xy}\cdot\cos(x+y)
+=e^{xy}\big[y\sin(x+y)+\cos(x+y)\big].
+\]
+对 $y$ 求偏导（$x$ 视为常数）：
+\[
+\frac{\partial z}{\partial y}=e^{xy}\cdot x\cdot\sin(x+y)+e^{xy}\cdot\cos(x+y)
+=e^{xy}\big[x\sin(x+y)+\cos(x+y)\big].
+\]
+
+\item
+\[
+\frac{\partial z}{\partial x}=\frac{2x}{x^2+\sin y},\qquad
+\frac{\partial z}{\partial y}=\frac{\cos y}{x^2+\sin y}.
+\]
+
+\item
+\begin{align*}
+\frac{\partial u}{\partial x}&=\cos(xyz)\cdot yz+e^{x+y-z},\\[2pt]
+\frac{\partial u}{\partial y}&=\cos(xyz)\cdot xz+e^{x+y-z},\\[2pt]
+\frac{\partial u}{\partial z}&=\cos(xyz)\cdot xy-e^{x+y-z}.
+\end{align*}
+
+\item
+\[
+\frac{\partial u}{\partial x}=\frac{1}{x+y^2+e^z},\quad
+\frac{\partial u}{\partial y}=\frac{2y}{x+y^2+e^z},\quad
+\frac{\partial u}{\partial z}=\frac{e^z}{x+y^2+e^z}.
+\]
+\end{enumerate}
+\end{solution}
+\bigskip
+
+% =================================================
+% 第三题：全微分
+% =================================================
+\begin{problem}
+求下列函数的全微分：
+\begin{enumerate}
+\item 设 $z=e^{xy}\cos(x+y)$，求 $\mathrm{d}z$；
+\item 设 $u=e^x\sin y\ln z$，求 $\mathrm{d}u$。
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item 先求偏导数：
+\begin{align*}
+\frac{\partial z}{\partial x}&=e^{xy}\cdot y\cdot\cos(x+y)-e^{xy}\cdot\sin(x+y)
+=e^{xy}\big[y\cos(x+y)-\sin(x+y)\big],\\[2pt]
+\frac{\partial z}{\partial y}&=e^{xy}\cdot x\cdot\cos(x+y)-e^{xy}\cdot\sin(x+y)
+=e^{xy}\big[x\cos(x+y)-\sin(x+y)\big].
+\end{align*}
+故
+\[
+\mathrm{d}z=e^{xy}\big[y\cos(x+y)-\sin(x+y)\big]\,\mathrm{d}x
+        +e^{xy}\big[x\cos(x+y)-\sin(x+y)\big]\,\mathrm{d}y.
+\]
+
+\item 先求偏导数：
+\[
+\frac{\partial u}{\partial x}=e^x\sin y\ln z,\quad
+\frac{\partial u}{\partial y}=e^x\cos y\ln z,\quad
+\frac{\partial u}{\partial z}=e^x\sin y\cdot\frac{1}{z}.
+\]
+故
+\[
+\mathrm{d}u=e^x\sin y\ln z\,\mathrm{d}x+e^x\cos y\ln z\,\mathrm{d}y
+        +\frac{e^x\sin y}{z}\,\mathrm{d}z.
+\]
+\end{enumerate}
+\end{solution}
+\bigskip
+
+% =================================================
+% 第四题：多元复合函数求导
+% =================================================
+\begin{problem}
+求下列复合函数的偏导数，指明中间变量与最终变量：
+\begin{enumerate}
+\item 设 $z=e^{u}\sin v$，$u=xy$，$v=x+y$，求 $\dfrac{\partial z}{\partial x}$，$\dfrac{\partial z}{\partial y}$；
+\item 设 $z=u^2\cos v$，$u=x^2-y^2$，$v=2x$（注意 $v$ 仅为 $x$ 的一元函数，出现全导数），求 $\dfrac{\partial z}{\partial x}$，$\dfrac{\partial z}{\partial y}$。
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item 中间变量：$u$, $v$；最终变量：$x$, $y$。且 $u$, $v$ 均为 $x$, $y$ 的二元函数。
+由链式法则：
+\begin{align*}
+\frac{\partial z}{\partial x}
+&= \frac{\partial z}{\partial u}\cdot\frac{\partial u}{\partial x}
+   +\frac{\partial z}{\partial v}\cdot\frac{\partial v}{\partial x}
+ = e^{u}\sin v\cdot y + e^{u}\cos v\cdot 1
+ = e^{u}\big(y\sin v+\cos v\big), \\[4pt]
+\frac{\partial z}{\partial y}
+&= \frac{\partial z}{\partial u}\cdot\frac{\partial u}{\partial y}
+   +\frac{\partial z}{\partial v}\cdot\frac{\partial v}{\partial y}
+ = e^{u}\sin v\cdot x + e^{u}\cos v\cdot 1
+ = e^{u}\big(x\sin v+\cos v\big).
+\end{align*}
+
+\item 中间变量：$u$, $v$；最终变量：$x$, $y$。\\
+变量依赖关系：
+\[
+z\;\longrightarrow\; u\;\longrightarrow\; x,\,y,
+\qquad
+z\;\longrightarrow\; v\;\longrightarrow\; x \;\;(\text{仅 }x，\text{出现全导数}).
+\]
+由链式法则（注意 $v$ 仅依赖于 $x$，故 $\frac{\partial v}{\partial x}=\frac{\mathrm{d}v}{\mathrm{d}x}$）：
+\begin{align*}
+\frac{\partial z}{\partial x}
+&= \frac{\partial z}{\partial u}\cdot\frac{\partial u}{\partial x}
+   + \frac{\partial z}{\partial v}\cdot\frac{\mathrm{d}v}{\mathrm{d}x} \\[4pt]
+&= 2u\cos v \cdot 2x + u^2(-\sin v) \cdot 2 \\[4pt]
+&= 4xu\cos v - 2u^2\sin v, \\[6pt]
+\frac{\partial z}{\partial y}
+&= \frac{\partial z}{\partial u}\cdot\frac{\partial u}{\partial y}
+   + \frac{\partial z}{\partial v}\cdot\frac{\partial v}{\partial y} \\[4pt]
+&= 2u\cos v \cdot (-2y) + u^2(-\sin v) \cdot 0 \\[4pt]
+&= -4yu\cos v.
+\end{align*}
+（因 $v$ 与 $y$ 无关，$\frac{\partial v}{\partial y}=0$，$v$ 通道对此偏导数无贡献。）
+\end{enumerate}
+\end{solution}
+\bigskip
+
+% =================================================
+% 第五题：多元隐函数求导
+% =================================================
+\begin{problem}
+求下列方程所确定的隐函数的偏导数：
+\begin{enumerate}
+\item 设方程 $z^3-3xyz=1$ 确定隐函数 $z=z(x,y)$，求 $\dfrac{\partial z}{\partial x}$，$\dfrac{\partial z}{\partial y}$；
+\item 设方程 $\sin(x+z)+yz=0$ 确定隐函数 $z=z(x,y)$，求 $\dfrac{\partial z}{\partial x}$，$\dfrac{\partial z}{\partial y}$。
+\end{enumerate}
+\end{problem}
+
+\begin{solution}
+\begin{enumerate}
+\item 令 $F(x,y,z)=z^3-3xyz-1$，则
+\[
+F_x=-3yz,\quad F_y=-3xz,\quad F_z=3z^2-3xy.
+\]
+由隐函数求导公式：
+\[
+\frac{\partial z}{\partial x}=-\frac{F_x}{F_z}=-\frac{-3yz}{3z^2-3xy}=\frac{yz}{z^2-xy},
+\qquad
+\frac{\partial z}{\partial y}=-\frac{F_y}{F_z}=-\frac{-3xz}{3z^2-3xy}=\frac{xz}{z^2-xy}.
+\]
+
+\item 令 $F(x,y,z)=\sin(x+z)+yz$，则
+\[
+F_x=\cos(x+z),\quad F_y=z,\quad F_z=\cos(x+z)+y.
+\]
+由隐函数求导公式：
+\[
+\frac{\partial z}{\partial x}=-\frac{F_x}{F_z}=-\frac{\cos(x+z)}{\cos(x+z)+y},
+\qquad
+\frac{\partial z}{\partial y}=-\frac{F_y}{F_z}=-\frac{z}{\cos(x+z)+y}.
+\]
+\end{enumerate}
+\end{solution}
+\bigskip
+
+\end{document}

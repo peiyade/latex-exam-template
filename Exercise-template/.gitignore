@@ -1,0 +1,36 @@
+# LaTeX intermediate files
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.bak*
+*.toc
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+
+# Generated files
+*.pdf
+*.png
+
+# Output directories
+output/
+.temp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

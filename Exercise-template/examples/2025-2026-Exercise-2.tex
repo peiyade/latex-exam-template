@@ -1,0 +1,215 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+% \documentclass[]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+% PDF信息里的标题栏
+\title{高等数学A (二)}
+% PDF信息里的作者栏
+\author{}
+% PDF信息里的主题
+\Subject{作业}
+% PDF信息里的关键词
+\Keywords{高等数学}
+
+% =================================================
+%       试卷头信息
+% =================================================
+% 试卷头里的年份
+\Year{2025--2026}
+% 试卷头里的学期
+\Semester{春季}
+% 试卷头里的课程
+\Course{高等数学A}
+% 考试时间
+\Time{}
+% 试卷头里的类型，如A/B/模拟等
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+% 生成试卷表头
+\makehead
+
+\vspace{1cm}
+
+\makepart{解答题}{每小题错误扣~$2$~分}
+
+\begin{problem}
+求下列可分离变量的微分方程的通解：
+$$\frac{\mathrm{d}y}{\mathrm{d}x} = \frac{x e^{x^2}}{y}$$
+\end{problem}
+\begin{note}
+    见《高等数学》(上册) Page 294（可分离变量）和 Page 189（第一类换元积分法）。
+\end{note}
+\begin{solution}
+    分离变量得
+    $$y\,\mathrm{d}y = x e^{x^2}\,\mathrm{d}x$$
+    
+    两边积分。左边直接积，右边用凑微分：
+    
+    注意到 $\mathrm{d}(x^2) = 2x\,\mathrm{d}x$，所以 $x\,\mathrm{d}x = \frac{1}{2}\mathrm{d}(x^2)$。
+    令 $u = x^2$，则
+    $$\int x e^{x^2}\,\mathrm{d}x = \frac{1}{2}\int e^u\,\mathrm{d}u = \frac{1}{2}e^{x^2} + C_1$$
+    
+    左边：$\int y\,\mathrm{d}y = \frac{y^2}{2}$
+    
+    于是
+    $$\frac{y^2}{2} = \frac{1}{2}e^{x^2} + C_1$$
+    
+    整理得
+    $$\boxed{y^2 = e^{x^2} + C}$$
+    其中 $C = 2C_1$。
+    
+    （关键：识别出 $x\,\mathrm{d}x$ 和 $\mathrm{d}(x^2)$ 的关系，用凑微分）
+\end{solution}
+\bigskip
+
+\begin{problem}
+求下列齐次方程的通解：
+$$\frac{\mathrm{d}y}{\mathrm{d}x} = \frac{y}{x} + \left(\frac{y}{x}\right)^2$$
+\end{problem}
+\begin{note}
+    见《高等数学》(上册) Page 301，齐次方程的标准换元 $u = \frac{y}{x}$。
+\end{note}
+\begin{solution}
+    令 $u = \frac{y}{x}$，即 $y = ux$，则 $\frac{\mathrm{d}y}{\mathrm{d}x} = u + x\frac{\mathrm{d}u}{\mathrm{d}x}$。
+    
+    代入原方程：
+    $$u + x\frac{\mathrm{d}u}{\mathrm{d}x} = u + u^2$$
+    
+    化简得
+    $$x\frac{\mathrm{d}u}{\mathrm{d}x} = u^2$$
+    
+    分离变量：
+    $$\frac{\mathrm{d}u}{u^2} = \frac{\mathrm{d}x}{x}$$
+    
+    积分：$-\frac{1}{u} = \ln|x| + C_1$
+    
+    代回 $u = \frac{y}{x}$：
+    $$-\frac{x}{y} = \ln|x| + C_1$$
+    
+    解得
+    $$\boxed{y = -\frac{x}{\ln|x| + C}}$$
+\end{solution}
+\bigskip
+
+\begin{problem}
+求下列一阶线性非齐次微分方程的通解：
+$$y' + \frac{1}{x}y = x^2 \quad (x > 0)$$
+\end{problem}
+\begin{note}
+    见《高等数学》(上册) Page 307--308，用常数变易法。
+\end{note}
+\begin{solution}
+    先解齐次方程 $y' + \frac{1}{x}y = 0$：
+    $$\frac{\mathrm{d}y}{y} = -\frac{\mathrm{d}x}{x} \Rightarrow \ln|y| = -\ln|x| + \ln|C|$$
+    得 $y_h = \frac{C}{x}$。
+    
+    用常数变易法，设特解 $y = \frac{C(x)}{x}$，则
+    $$y' = \frac{C'(x) \cdot x - C(x)}{x^2}$$
+    
+    代入原方程：
+    $$\frac{C'(x) \cdot x - C(x)}{x^2} + \frac{1}{x} \cdot \frac{C(x)}{x} = x^2$$
+    
+    化简得 $\frac{C'(x)}{x} = x^2$，即 $C'(x) = x^3$。
+    
+    积分得 $C(x) = \frac{x^4}{4} + C$。
+    
+    故通解为
+    $$\boxed{y = \frac{x^3}{4} + \frac{C}{x}}$$
+\end{solution}
+\bigskip
+
+\begin{problem}
+求下列可降阶微分方程的通解（$y'' = f(x, y')$ 型）：
+$$y'' = x + y'$$
+\end{problem}
+\begin{note}
+    见《高等数学》(上册) Page 313--314，令 $p = y'$ 降阶。
+\end{note}
+\begin{solution}
+    令 $p = y'$，则 $y'' = p'$，方程化为
+    $$p' - p = x$$
+    
+    这是一阶线性方程，积分因子 $\mu(x) = e^{-x}$。
+    
+    两边乘 $e^{-x}$：
+    $$(e^{-x}p)' = xe^{-x}$$
+    
+    积分（分部积分）：$e^{-x}p = -(x+1)e^{-x} + C_1$
+    
+    所以 $p = C_1e^x - x - 1$。
+    
+    再积分得
+    $$\boxed{y = C_1e^x - \frac{x^2}{2} - x + C_2}$$
+\end{solution}
+\bigskip
+
+\begin{problem}
+求下列可降阶微分方程满足初值条件的特解（$y'' = f(y, y')$ 型）：
+$$yy'' + (y')^2 = 0, \quad y(0) = 1, \quad y'(0) = \frac{1}{2}$$
+\end{problem}
+\begin{note}
+    见《高等数学》(上册) Page 315--316，令 $p = y'$，注意 $y'' = p\frac{\mathrm{d}p}{\mathrm{d}y}$。
+\end{note}
+\begin{solution}
+    令 $p = y'$，则 $y'' = p\frac{\mathrm{d}p}{\mathrm{d}y}$，代入得
+    $$yp\frac{\mathrm{d}p}{\mathrm{d}y} + p^2 = 0 \Rightarrow p\left(y\frac{\mathrm{d}p}{\mathrm{d}y} + p\right) = 0$$
+    
+    由 $y'(0) = \frac{1}{2} \neq 0$，知 $p \neq 0$，故
+    $$y\frac{\mathrm{d}p}{\mathrm{d}y} + p = 0$$
+    
+    分离变量：$\frac{\mathrm{d}p}{p} = -\frac{\mathrm{d}y}{y}$
+    
+    积分：$\ln|p| = -\ln|y| + \ln|C_1|$，即 $p = \frac{C_1}{y}$。
+    
+    由 $y(0)=1, y'(0)=\frac{1}{2}$ 得 $C_1 = \frac{1}{2}$。
+    
+    所以 $y' = \frac{1}{2y}$，分离变量 $2y\,\mathrm{d}y = \mathrm{d}x$。
+    
+    积分：$y^2 = x + C_2$，代入 $y(0)=1$ 得 $C_2=1$。
+    
+    特解为
+    $$\boxed{y^2 = x + 1}$$
+    即 $y = \sqrt{x+1}$（取正）。
+\end{solution}
+\bigskip
+
+\begin{problem}
+求下列二阶线性常系数齐次微分方程的通解：
+\begin{enumerate}
+    \item $y'' - 5y' + 6y = 0$
+    \item $y'' - 4y' + 4y = 0$
+\end{enumerate}
+\end{problem}
+\begin{note}
+    见《高等数学》(上册) Page 330--332。先写特征方程，根据判别式 $\Delta = p^2-4q$ 判断根的情况：$\Delta>0$ 两不等实根；$\Delta=0$ 重根；$\Delta<0$ 共轭复根。
+\end{note}
+\begin{solution}
+    \begin{enumerate}
+        \item 特征方程 $r^2 - 5r + 6 = 0$，即 $(r-2)(r-3)=0$。
+        
+        根为 $r_1=2, r_2=3$，$\Delta=1>0$。
+        
+        通解
+        $$\boxed{y = C_1e^{2x} + C_2e^{3x}}$$
+        
+        \item 特征方程 $r^2 - 4r + 4 = 0$，即 $(r-2)^2=0$。
+        
+        重根 $r=2$，$\Delta=0$。
+        
+        通解
+        $$\boxed{y = (C_1 + C_2x)e^{2x}}$$
+    \end{enumerate}
+\end{solution}
+
+\end{document}

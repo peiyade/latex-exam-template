@@ -1,0 +1,412 @@
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[answer]{THUExam}
+\usepackage{HTNotes-math}
+\usepackage{pifont}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes, shapes.multipart, arrows.meta, arrows, decorations.markings, external, trees}
+
+% =================================================
+%       PDF信息
+% =================================================
+\title{高等数学A (二)}
+\author{}
+\Subject{复习题}
+\Keywords{高等数学, 多元函数微分学, 偏导数, 极值}
+
+% =================================================
+%       试卷头信息
+% =================================================
+\Year{2025--2026}
+\Semester{春季}
+\Course{高等数学A}
+\Time{}
+\Type{A}
+
+\begin{document}
+\vspace{1cm}
+\makehead
+
+\vspace{1cm}
+
+% =================================================
+%       选择题：概念辨析
+% =================================================
+\makepart{选择题}{每小题~4~分，共~24~分}
+
+\begin{note}
+\textbf{充分条件与必要条件：} 设 $P$ 和 $Q$ 为两个命题，"若 $P$ 则 $Q$" 为真时，称 $P$ 是 $Q$ 的\textbf{充分条件}，$Q$ 是 $P$ 的\textbf{必要条件}。
+
+\textbf{例} 命题"若下雨，则地面湿"为真。因此：
+\begin{itemize}
+	\item "下雨"是"地面湿"的充分条件（下雨 $\Rightarrow$ 地面湿）；
+	\item "地面湿"是"下雨"的必要条件（若地面不湿，则一定没下雨）。
+\end{itemize}
+注意：充分条件不一定是必要条件——地面湿不一定是因为下雨（可能是洒水车）。
+\end{note}
+\bigskip
+
+\begin{problem}
+$f(x,y)$ 在点 $(x,y)$ 可微分是 $f(x,y)$ 在该点连续的 \underline{\hspace{2em}} 条件，$f(x,y)$ 在点 $(x,y)$ 连续是 $f(x,y)$ 在该点可微分的 \underline{\hspace{2em}} 条件。\pickout{A}
+\options
+{充分；必要}
+{必要；充分}
+{充分必要；充分必要}
+{必要；充分必要}
+\end{problem}
+\begin{note}
+可微分必连续，故"可微分"是"连续"的充分条件；连续不一定可微分，故"连续"是"可微分"的必要条件。
+\end{note}
+\bigskip
+
+\begin{problem}
+$z=f(x,y)$ 在点 $(x,y)$ 的偏导数 $\dfrac{\partial z}{\partial x}$ 及 $\dfrac{\partial z}{\partial y}$ 存在是 $f(x,y)$ 在该点可微分的 \underline{\hspace{2em}} 条件，$z=f(x,y)$ 在点 $(x,y)$ 可微分是函数在该点的偏导数 $\dfrac{\partial z}{\partial x}$ 及 $\dfrac{\partial z}{\partial y}$ 存在的 \underline{\hspace{2em}} 条件。\pickout{B}
+\options
+{充分；必要}
+{必要；充分}
+{充分必要；充分必要}
+{充分；充分}
+\end{problem}
+\begin{note}
+偏导数存在不能保证可微分（如 $f(x,y)=\sqrt{|xy|}$ 在原点），故"偏导存在"是"可微"的必要条件；可微分则偏导数必存在，故"可微"是"偏导存在"的充分条件。
+\end{note}
+\bigskip
+
+\begin{problem}
+$z=f(x,y)$ 的偏导数 $\dfrac{\partial z}{\partial x}$ 及 $\dfrac{\partial z}{\partial y}$ 在点 $(x,y)$ 存在且连续是 $f(x,y)$ 在该点可微分的 \underline{\hspace{2em}} 条件。\pickout{A}
+\options
+{充分}
+{必要}
+{充分必要}
+{既不充分也不必要}
+\end{problem}
+\begin{note}
+偏导数存在且连续是可微分的充分条件（教材定理），但不是必要条件（可微时偏导数不一定连续）。
+\end{note}
+\bigskip
+
+\begin{problem}
+函数 $z=f(x,y)$ 的两个二阶混合偏导数 $\dfrac{\partial^2 z}{\partial x\partial y}$ 及 $\dfrac{\partial^2 z}{\partial y\partial x}$ 在区域 $D$ 内连续是这两个二阶混合偏导数在 $D$ 内相等的 \underline{\hspace{2em}} 条件。\pickout{A}
+\options
+{充分}
+{必要}
+{充分必要}
+{既不充分也不必要}
+\end{problem}
+\begin{note}
+由p67 定理，混合偏导数连续则必相等，故为充分条件；但相等时不一定需要连续，故不是必要条件。
+\end{note}
+\bigskip
+
+\begin{note}
+\textbf{偏导数、连续与可微的关系总结：}
+\[
+\text{偏导数连续}
+\quad\Rightarrow\quad
+\text{可微分}
+\quad\Rightarrow\quad
+\begin{cases}
+\text{函数连续}\\[4pt]
+\text{偏导数存在}
+\end{cases}
+\]
+
+反之均不成立：
+\begin{itemize}
+	\item 偏导数存在 $\nRightarrow$ 函数连续，也不 $\Rightarrow$ 可微（反例：$f(x,y)=\begin{cases}\dfrac{xy}{x^2+y^2},&(x,y)\neq(0,0)\\0,&(x,y)=(0,0)\end{cases}$，偏导存在但不连续）；
+	\item 函数连续 $\nRightarrow$ 偏导数存在（反例：$f(x,y)=|x|+|y|$ 在原点连续但偏导不存在），也不 $\Rightarrow$ 可微；
+	\item 可微 $\nRightarrow$ 偏导数连续（反例：$f(x,y)=x^2\sin\dfrac{1}{x}+y^2\sin\dfrac{1}{y}$ 补原点定义后可微但偏导不连续）。
+\end{itemize}
+\end{note}
+\bigskip
+
+\begin{problem}
+设函数 $f(x,y)$ 在点 $(0,0)$ 的某邻域内有定义，且 $f_x(0,0)=3,\ f_y(0,0)=-1$，则有\pickout{C}
+\options
+{$\left.\mathrm{d}z\right|_{(0,0)}=3\,\mathrm{d}x-\mathrm{d}y$}
+{曲面 $z=f(x,y)$ 在点 $(0,0,f(0,0))$ 的一个法向量为 $(3,-1,1)$}
+{曲线 $\left\{\begin{array}{l}z=f(x,y),\\ y=0\end{array}\right.$ 在点 $(0,0,f(0,0))$ 的一个切向量为 $(1,0,3)$}
+{曲线 $\left\{\begin{array}{l}z=f(x,y),\\ y=0\end{array}\right.$ 在点 $(0,0,f(0,0))$ 的一个切向量为 $(3,0,1)$}
+\end{problem}
+\begin{note}
+偏导存在不一定可微，(A) 错误；曲面法向量应为 $(f_x,f_y,-1)=(3,-1,-1)$，(B) 错误；曲线参数方程为 $x=t,\ y=0,\ z=f(t,0)$，切向量为 $(1,0,f_x(0,0))=(1,0,3)$，(C) 正确。
+\end{note}
+\bigskip
+
+\begin{problem}
+函数 $f(x,y)=\dfrac{\sqrt{4x-y^2}}{\ln\left(1-x^2-y^2\right)}$ 的定义域为\pickout{C}
+\options
+{$\{(x,y)\mid 0<y^2\leq 4x,\ x^2+y^2<1\}$}
+{$\{(x,y)\mid y^2<4x,\ x^2+y^2<1\}$}
+{$\{(x,y)\mid y^2\leq 4x,\ 0<x^2+y^2<1\}$}
+{$\{(x,y)\mid y^2\leq 4x,\ x^2+y^2\leq 1\}$}
+\end{problem}
+\begin{note}
+分子要求 $4x-y^2\geq 0$；分母要求 $1-x^2-y^2>0$ 且 $\ln(1-x^2-y^2)\neq 0$，即 $0<x^2+y^2<1$。综合得 $y^2\leq 4x$ 且 $0<x^2+y^2<1$。
+\end{note}
+\bigskip
+
+% =================================================
+%       计算题：偏导数与几何应用
+% =================================================
+\newpage
+\makepart{计算题}{每小题~8~分，共~48~分}
+
+\vspace{-0.3cm}
+\begin{center}
+\textit{（计算题1-4本质是偏导数计算题）}
+\end{center}
+\vspace{0.3cm}
+
+\begin{problem}
+求函数 $z=\ln\left(x+y^2\right)$ 的一阶偏导数和二阶偏导数。
+\end{problem}
+\begin{solution}
+一阶偏导数：
+\[
+\frac{\partial z}{\partial x}=\frac{1}{x+y^2},\qquad
+\frac{\partial z}{\partial y}=\frac{2y}{x+y^2}.
+\]
+
+二阶偏导数：
+\begin{align*}
+\frac{\partial^2 z}{\partial x^2}&=-\frac{1}{(x+y^2)^2},\\[4pt]
+\frac{\partial^2 z}{\partial y^2}&=\frac{2(x+y^2)-2y\cdot 2y}{(x+y^2)^2}=\frac{2(x-y^2)}{(x+y^2)^2},\\[4pt]
+\frac{\partial^2 z}{\partial x\partial y}&=-\frac{2y}{(x+y^2)^2}.
+\end{align*}
+\end{solution}
+\vspace{0.5cm}
+
+\begin{problem}
+求函数 $z=\dfrac{xy}{x^2-y^2}$ 在点 $(2,1)$ 处的全微分。
+\end{problem}
+\begin{solution}
+先求偏导数：
+\[
+\frac{\partial z}{\partial x}=\frac{y(x^2-y^2)-xy\cdot 2x}{(x^2-y^2)^2}=\frac{-y(x^2+y^2)}{(x^2-y^2)^2},\qquad
+\frac{\partial z}{\partial y}=\frac{x(x^2+y^2)}{(x^2-y^2)^2}.
+\]
+
+在点 $(2,1)$ 处，$x^2-y^2=3$，$x^2+y^2=5$，故
+\[
+\left.\frac{\partial z}{\partial x}\right|_{(2,1)}=-\frac{5}{9},\qquad
+\left.\frac{\partial z}{\partial y}\right|_{(2,1)}=\frac{10}{9}.
+\]
+
+因此全微分为
+\[
+\boxed{\mathrm{d}z=-\frac{5}{9}\,\mathrm{d}x+\frac{10}{9}\,\mathrm{d}y}.
+\]
+\end{solution}
+\vspace{0.5cm}
+
+\begin{problem}
+设 $z=f(u,x,y)$，$u=x\mathrm{e}^y$，其中 $f$ 具有连续的二阶偏导数，求 $\dfrac{\partial^2 z}{\partial x\partial y}$。
+\end{problem}
+\begin{solution}
+记 $f_1=f_u,\ f_2=f_x,\ f_3=f_y$，则
+\[
+\frac{\partial z}{\partial x}=f_1\cdot\mathrm{e}^y+f_2.
+\]
+
+对 $y$ 求偏导，注意 $u=x\mathrm{e}^y$：
+\begin{align*}
+\frac{\partial^2 z}{\partial x\partial y}
+&=\bigl(f_{11}\cdot x\mathrm{e}^y+f_{13}\bigr)\mathrm{e}^y+f_1\cdot\mathrm{e}^y+\bigl(f_{21}\cdot x\mathrm{e}^y+f_{23}\bigr)\\
+&=x\mathrm{e}^{2y}f_{11}+\mathrm{e}^yf_{13}+\mathrm{e}^yf_1+x\mathrm{e}^yf_{21}+f_{23}.
+\end{align*}
+
+由于 $f$ 具有连续二阶偏导数，$f_{13}=f_{31}$，$f_{21}=f_{12}$，$f_{23}=f_{32}$。最终结果为
+\[
+\boxed{\frac{\partial^2 z}{\partial x\partial y}=x\mathrm{e}^{2y}f_{11}+x\mathrm{e}^yf_{21}+\mathrm{e}^yf_{13}+\mathrm{e}^yf_1+f_{23}}.
+\]
+\end{solution}
+\vspace{0.5cm}
+
+\begin{problem}
+设 $x=\mathrm{e}^u\cos v,\ y=\mathrm{e}^u\sin v,\ z=uv$。试求 $\dfrac{\partial z}{\partial x}$ 和 $\dfrac{\partial z}{\partial y}$。
+\end{problem}
+\begin{solution}
+由 $x=\mathrm{e}^u\cos v,\ y=\mathrm{e}^u\sin v$，两边求全微分：
+\[
+\mathrm{d}x=\mathrm{e}^u\cos v\,\mathrm{d}u-\mathrm{e}^u\sin v\,\mathrm{d}v=x\,\mathrm{d}u-y\,\mathrm{d}v,\qquad
+\mathrm{d}y=\mathrm{e}^u\sin v\,\mathrm{d}u+\mathrm{e}^u\cos v\,\mathrm{d}v=y\,\mathrm{d}u+x\,\mathrm{d}v.
+\]
+
+解得
+\[
+\mathrm{d}u=\frac{x\,\mathrm{d}x+y\,\mathrm{d}y}{x^2+y^2}=\mathrm{e}^{-u}\cos v\,\mathrm{d}x+\mathrm{e}^{-u}\sin v\,\mathrm{d}y,\qquad
+\mathrm{d}v=\frac{-y\,\mathrm{d}x+x\,\mathrm{d}y}{x^2+y^2}=-\mathrm{e}^{-u}\sin v\,\mathrm{d}x+\mathrm{e}^{-u}\cos v\,\mathrm{d}y.
+\]
+
+故
+\[
+\frac{\partial u}{\partial x}=\mathrm{e}^{-u}\cos v,\quad
+\frac{\partial v}{\partial x}=-\mathrm{e}^{-u}\sin v,\quad
+\frac{\partial u}{\partial y}=\mathrm{e}^{-u}\sin v,\quad
+\frac{\partial v}{\partial y}=\mathrm{e}^{-u}\cos v.
+\]
+
+又 $z=uv$，由链式法则：
+\begin{align*}
+\frac{\partial z}{\partial x}&=v\frac{\partial u}{\partial x}+u\frac{\partial v}{\partial x}=\mathrm{e}^{-u}(v\cos v-u\sin v),\\[4pt]
+\frac{\partial z}{\partial y}&=v\frac{\partial u}{\partial y}+u\frac{\partial v}{\partial y}=\mathrm{e}^{-u}(v\sin v+u\cos v).
+\end{align*}
+
+即
+\[
+\boxed{\frac{\partial z}{\partial x}=\mathrm{e}^{-u}(v\cos v-u\sin v),\qquad
+\frac{\partial z}{\partial y}=\mathrm{e}^{-u}(v\sin v+u\cos v)}.
+\]
+\end{solution}
+\vspace{0.5cm}
+
+\begin{problem}
+求螺旋线 $x=a\cos\theta,\ y=a\sin\theta,\ z=b\theta$ 在点 $(a,0,0)$ 处的切线及法平面方程。
+\end{problem}
+\begin{solution}
+点 $(a,0,0)$ 对应参数 $\theta=0$。
+
+切向量为
+\[
+\boldsymbol{s}=\bigl(x'(\theta),y'(\theta),z'(\theta)\bigr)\big|_{\theta=0}=(-a\sin\theta,\ a\cos\theta,\ b)\big|_{\theta=0}=(0,\ a,\ b).
+\]
+
+切线方程为
+\[
+\boxed{\frac{x-a}{0}=\frac{y}{a}=\frac{z}{b}},\qquad\text{即}\quad\left\{\begin{aligned}&x=a,\\ &by=az.\end{aligned}\right.
+\]
+
+法平面方程为
+\[
+0\cdot(x-a)+a\cdot(y-0)+b\cdot(z-0)=0,
+\]
+即
+\[
+\boxed{ay+bz=0}.
+\]
+\end{solution}
+\vspace{0.5cm}
+
+\begin{problem}
+在曲面 $z=xy$ 上求一点，使这点处的法线垂直于平面 $x+3y+z+9=0$，并写出该法线的方程。
+\end{problem}
+\begin{solution}
+设 $F(x,y,z)=xy-z$，则曲面在点 $(x,y,z)$ 处的法向量为
+\[
+\boldsymbol{n}=\nabla F=(y,\ x,\ -1).
+\]
+
+平面 $x+3y+z+9=0$ 的法向量为 $\boldsymbol{n_0}=(1,\ 3,\ 1)$。
+
+法线垂直于平面，即法向量 $\boldsymbol{n}$ 与平面法向量 $\boldsymbol{n_0}$ 平行，故
+\[
+\frac{y}{1}=\frac{x}{3}=\frac{-1}{1}=-1.
+\]
+
+解得 $x=-3,\ y=-1$，代入曲面方程得 $z=xy=3$。
+
+所求点为 $\boxed{(-3,\ -1,\ 3)}$，法线方程为
+\[
+\boxed{\frac{x+3}{1}=\frac{y+1}{3}=\frac{z-3}{1}}.
+\]
+\end{solution}
+
+% =================================================
+%       解答题：极值应用
+% =================================================
+\newpage
+\makepart{解答题}{每小题~14~分，共~28~分}
+
+\begin{problem}
+某厂家生产的一种产品同时在两个市场销售，售价分别为 $p_1$ 和 $p_2$，销售量分别为 $q_1$ 和 $q_2$，需求函数分别为
+\[
+q_1=24-0.2p_1,\quad q_2=10-0.05p_2,
+\]
+总成本函数为
+\[
+C=35+40\left(q_1+q_2\right).
+\]
+试问：厂家如何确定两个市场的售价，能使其获得的总利润最大？最大总利润为多少？
+\end{problem}
+\begin{solution}
+收入函数 $R=p_1q_1+p_2q_2$，利润函数 $L=R-C$，即
+\begin{align*}
+L&=p_1(24-0.2p_1)+p_2(10-0.05p_2)-\Bigl[35+40\bigl(24-0.2p_1+10-0.05p_2\bigr)\Bigr]\\
+&=-0.2p_1^2-0.05p_2^2+32p_1+12p_2-1395.
+\end{align*}
+
+求驻点：
+\[
+\frac{\partial L}{\partial p_1}=-0.4p_1+32=0\quad\Longrightarrow\quad p_1=80,\qquad
+\frac{\partial L}{\partial p_2}=-0.1p_2+12=0\quad\Longrightarrow\quad p_2=120.
+\]
+
+验证：$q_1=24-16=8>0$，$q_2=10-6=4>0$，均非负，符合实际意义。
+
+此时最大利润为
+\[
+L_{\max}=-0.2\times 80^2-0.05\times 120^2+32\times 80+12\times 120-1395
+=-1280-720+2560+1440-1395=\boxed{605}.
+\]
+
+故最优售价为 $\boxed{p_1=80}$、$\boxed{p_2=120}$，最大总利润为 $\boxed{605}$。
+\end{solution}
+\vspace{0.5cm}
+
+\begin{problem}
+某工厂要用钢板制作一个容积为 $8\,\mathrm{m}^3$ 的有盖长方体水箱。问：当长、宽、高各取多少时，所用钢板最省？并求此时的最小表面积。
+\end{problem}
+\begin{solution}
+设水箱的长、宽、高分别为 $x,y,z$（单位：m，且 $x,y,z>0$）。
+
+约束条件：$xyz=8$。
+
+有盖长方体的表面积（即用料面积）为
+\[
+S=2(xy+yz+zx).
+\]
+
+构造拉格朗日函数
+\[
+\mathcal{L}(x,y,z,\lambda)=2(xy+yz+zx)+\lambda(xyz-8).
+\]
+
+求偏导并令其为零：
+\begin{align*}
+\frac{\partial\mathcal{L}}{\partial x}&=2(y+z)+\lambda yz=0,\tag{1}\\[2pt]
+\frac{\partial\mathcal{L}}{\partial y}&=2(x+z)+\lambda xz=0,\tag{2}\\[2pt]
+\frac{\partial\mathcal{L}}{\partial z}&=2(x+y)+\lambda xy=0,\tag{3}\\[2pt]
+\frac{\partial\mathcal{L}}{\partial\lambda}&=xyz-8=0.\tag{4}
+\end{align*}
+
+由 $(1)$ 与 $(2)$ 相减：
+\[
+2(y-x)+\lambda z(y-x)=0\quad\Longrightarrow\quad (y-x)(2+\lambda z)=0.
+\]
+
+若 $y\neq x$，则 $\lambda=-2/z$；同理由对称性可得 $\lambda=-2/y=-2/x$，从而 $x=y=z$，矛盾。故必有 $y=x$。
+
+将 $y=x$ 代入 $(1)$ 与 $(3)$：
+\[
+2(x+z)+\lambda xz=0,\qquad 4x+\lambda x^2=0.
+\]
+
+由第二式得 $\lambda=-4/x$（$x>0$），代入第一式：
+\[
+2(x+z)-\frac{4}{x}\cdot xz=2x+2z-4z=2x-2z=0\quad\Longrightarrow\quad x=z.
+\]
+
+因此 $x=y=z$，代入约束 $(4)$：
+\[
+x^3=8\quad\Longrightarrow\quad x=y=z=\boxed{2\,\mathrm{m}}.
+\]
+
+此时的最小表面积为
+\[
+S_{\min}=2(4+4+4)=\boxed{24\,\mathrm{m}^2}.
+\]
+\end{solution}
+
+\end{document}
