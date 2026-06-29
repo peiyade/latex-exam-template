@@ -182,14 +182,13 @@ def write_builder_copy(output_root: Path) -> None:
 
 
 def write_site_assets(output_root: Path) -> None:
-    (output_root / "docs/index.html").write_text(
-        "<!doctype html><meta charset='utf-8'><title>AMM Analysis Training</title>"
-        "<main id='app'>AMM Analysis Training</main>"
-        "<script src='assets/site.js'></script>\n",
-        encoding="utf-8",
-    )
-    (output_root / "docs/assets/site.css").write_text("body { font-family: serif; }\n", encoding="utf-8")
-    (output_root / "docs/assets/site.js").write_text("console.log('AMM site');\n", encoding="utf-8")
+    docs_root = output_root / "docs"
+    assets_root = docs_root / "assets"
+    docs_root.mkdir(parents=True, exist_ok=True)
+    assets_root.mkdir(parents=True, exist_ok=True)
+    (docs_root / "index.html").write_text(INDEX_HTML, encoding="utf-8")
+    (assets_root / "site.css").write_text(SITE_CSS, encoding="utf-8")
+    (assets_root / "site.js").write_text(SITE_JS, encoding="utf-8")
 
 
 def write_readme(output_root: Path, stats: Dict[str, Any]) -> None:
@@ -199,6 +198,418 @@ def write_readme(output_root: Path, stats: Dict[str, Any]) -> None:
         f"Records: {stats['total']}\n",
         encoding="utf-8",
     )
+
+
+INDEX_HTML = r"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AMM Analysis Training</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      startup: { typeset: false }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <script defer src="assets/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">AMM Analysis / Inequality / Extremum</p>
+      <h1>模式识别训练题库</h1>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+  <main class="layout">
+    <aside class="sidebar">
+      <label class="search-label" for="search-input">搜索</label>
+      <input id="search-input" type="search" aria-label="题号、tag、方法、关键词">
+      <section>
+        <h2>领域</h2>
+        <div class="chip-row" id="domain-filters"></div>
+      </section>
+      <section>
+        <h2>优先级</h2>
+        <div class="chip-row" id="priority-filters"></div>
+      </section>
+      <section>
+        <h2>状态</h2>
+        <div class="chip-row" id="review-filters"></div>
+      </section>
+      <section>
+        <h2>结构 Tags</h2>
+        <select id="tag-filter"><option value="">全部</option></select>
+      </section>
+      <section>
+        <h2>方法 Tags</h2>
+        <select id="method-filter"><option value="">全部</option></select>
+      </section>
+    </aside>
+    <section class="results">
+      <div class="result-head">
+        <strong id="result-count">0</strong>
+        <button id="clear-filters" type="button">清除筛选</button>
+      </div>
+      <div id="question-list" class="question-list"></div>
+    </section>
+    <article id="question-detail" class="detail" aria-live="polite"></article>
+  </main>
+  <script type="application/json" id="site-data-src">data/questions.json</script>
+</body>
+</html>
+"""
+
+
+SITE_CSS = r"""* { box-sizing: border-box; }
+body {
+  margin: 0;
+  color: #1f2421;
+  background: #edf2ef;
+  font-family: Georgia, "Noto Serif SC", "Source Han Serif SC", serif;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 32px 18px;
+  border-bottom: 1px solid #b8c8c0;
+  background: #fbfcf8;
+}
+.eyebrow { margin: 0 0 6px; color: #0a665a; font-weight: 700; }
+h1 { margin: 0; font-size: 32px; line-height: 1.05; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-content: start; }
+.stat-pill, .badge, .chip {
+  border: 1px solid #b8c8c0;
+  background: #fbfcf8;
+  padding: 6px 9px;
+  font-weight: 700;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(300px, 440px) minmax(520px, 1fr);
+  gap: 16px;
+  padding: 16px;
+  min-height: calc(100vh - 105px);
+}
+.sidebar, .results, .detail {
+  background: #fbfcf8;
+  border: 1px solid #b8c8c0;
+  min-width: 0;
+}
+.sidebar { padding: 16px; position: sticky; top: 16px; height: calc(100vh - 137px); overflow: auto; }
+.sidebar h2 { font-size: 14px; margin: 18px 0 8px; color: #52615b; }
+.search-label { display: block; font-weight: 700; margin-bottom: 8px; }
+input, select, button {
+  width: 100%;
+  border: 1px solid #b8c8c0;
+  background: #fbfcf8;
+  color: #1f2421;
+  padding: 9px 10px;
+  font: 700 14px/1.2 system-ui, sans-serif;
+}
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { width: auto; cursor: pointer; }
+.chip.is-active { background: #0a665a; border-color: #0a665a; color: #fffaf0; }
+.results { overflow: auto; }
+.result-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #b8c8c0;
+  background: #fbfcf8;
+}
+.result-head button { width: auto; }
+.question-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid #d5dfda;
+  background: transparent;
+  padding: 14px 12px;
+  cursor: pointer;
+}
+.question-card.is-selected { background: #e2eee9; box-shadow: inset 3px 0 0 #0a665a; }
+.question-title { font-size: 18px; font-weight: 800; line-height: 1.2; margin-bottom: 7px; }
+.question-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 7px; }
+.question-summary { color: #52615b; font-size: 14px; line-height: 1.45; }
+.detail { padding: 24px 28px; overflow: auto; }
+.detail h2 { font-size: 34px; line-height: 1.08; margin: 0 0 12px; }
+.detail-section { border-top: 1px solid #b8c8c0; padding-top: 18px; margin-top: 20px; }
+.detail-section h3 { margin: 0 0 10px; color: #0a665a; font-size: 18px; }
+.latex-block { font-size: 19px; line-height: 1.85; overflow-x: auto; }
+.card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.info-card { border: 1px solid #b8c8c0; padding: 12px; background: #f6f9f7; }
+.info-card strong { display: block; margin-bottom: 6px; color: #52615b; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.source-block { color: #52615b; font-size: 14px; line-height: 1.6; }
+pre.tikz-source { white-space: pre-wrap; overflow-x: auto; padding: 12px; background: #eef4f2; border: 1px solid #b8c8c0; }
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: 280px 1fr; }
+  .detail { grid-column: 1 / -1; }
+  .sidebar { height: auto; position: static; }
+}
+@media (max-width: 760px) {
+  .topbar { display: block; padding: 18px; }
+  .layout { display: block; padding: 10px; }
+  .sidebar, .results, .detail { margin-bottom: 12px; }
+  .card-grid { grid-template-columns: 1fr; }
+  .detail h2 { font-size: 26px; }
+}
+"""
+
+
+SITE_JS = r"""const state = {
+  questions: [],
+  filtered: [],
+  selectedId: "",
+  search: "",
+  domain: "",
+  priority: "",
+  review: "",
+  tag: "",
+  method: ""
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const response = await fetch("data/questions.json");
+  state.questions = await response.json();
+  state.questions.sort((a, b) => String(a.problem_number || "").localeCompare(String(b.problem_number || "")) || a.id.localeCompare(b.id));
+  renderStats();
+  hydrateControls();
+  Object.assign(state, parseHash());
+  syncControlsFromState();
+  applyFilters();
+});
+
+function parseHash() {
+  const hash = window.location.hash.replace(/^#/, "");
+  const params = new URLSearchParams(hash);
+  return {
+    selectedId: params.get("q") || "",
+    search: params.get("s") || "",
+    domain: params.get("domain") || "",
+    priority: params.get("priority") || "",
+    review: params.get("review") || "",
+    tag: params.get("tag") || "",
+    method: params.get("method") || ""
+  };
+}
+
+function writeHash() {
+  const params = new URLSearchParams();
+  if (state.selectedId) params.set("q", state.selectedId);
+  if (state.search) params.set("s", state.search);
+  if (state.domain) params.set("domain", state.domain);
+  if (state.priority) params.set("priority", state.priority);
+  if (state.review) params.set("review", state.review);
+  if (state.tag) params.set("tag", state.tag);
+  if (state.method) params.set("method", state.method);
+  window.history.replaceState(null, "", "#" + params.toString());
+}
+
+function renderStats() {
+  const stats = document.getElementById("stats");
+  const total = state.questions.length;
+  const high = state.questions.filter(q => q.priority === "high").length;
+  const cleanRequired = state.questions.filter(q => q.review_flag === "clean_required").length;
+  stats.innerHTML = [
+    pill(`${total} 题`),
+    pill(`High ${high}`),
+    pill(`Clean ${cleanRequired}`)
+  ].join("");
+}
+
+function hydrateControls() {
+  makeChips("domain-filters", ["analysis", "inequality", "extremum"], "domain");
+  makeChips("priority-filters", ["high", "medium", "low"], "priority");
+  makeChips("review-filters", ["auto_ok", "needs_review", "clean_required"], "review");
+  populateSelect("tag-filter", uniqueValues(q => q.tags));
+  populateSelect("method-filter", uniqueValues(q => q.methods));
+  document.getElementById("search-input").addEventListener("input", event => {
+    state.search = event.target.value.trim().toLowerCase();
+    applyFilters();
+  });
+  document.getElementById("tag-filter").addEventListener("change", event => {
+    state.tag = event.target.value;
+    applyFilters();
+  });
+  document.getElementById("method-filter").addEventListener("change", event => {
+    state.method = event.target.value;
+    applyFilters();
+  });
+  document.getElementById("clear-filters").addEventListener("click", () => {
+    state.search = "";
+    state.domain = "";
+    state.priority = "";
+    state.review = "";
+    state.tag = "";
+    state.method = "";
+    state.selectedId = "";
+    syncControlsFromState();
+    applyFilters();
+  });
+}
+
+function makeChips(containerId, values, field) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = values.map(value => `<button class="chip" type="button" data-field="${field}" data-value="${escapeHtml(value)}">${escapeHtml(value)}</button>`).join("");
+  container.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", () => {
+      state[field] = state[field] === button.dataset.value ? "" : button.dataset.value;
+      syncControlsFromState();
+      applyFilters();
+    });
+  });
+}
+
+function populateSelect(id, values) {
+  const select = document.getElementById(id);
+  select.innerHTML = '<option value="">全部</option>' + values.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+}
+
+function uniqueValues(project) {
+  return [...new Set(state.questions.flatMap(project).filter(Boolean))].sort((a, b) => a.localeCompare(b, "zh-Hans-CN"));
+}
+
+function syncControlsFromState() {
+  document.getElementById("search-input").value = state.search;
+  document.getElementById("tag-filter").value = state.tag;
+  document.getElementById("method-filter").value = state.method;
+  document.querySelectorAll(".chip").forEach(button => {
+    button.classList.toggle("is-active", state[button.dataset.field] === button.dataset.value);
+  });
+}
+
+function applyFilters() {
+  state.filtered = state.questions.filter(question => {
+    if (state.search && !question.search_text.includes(state.search)) return false;
+    if (state.domain && question.domain !== state.domain) return false;
+    if (state.priority && question.priority !== state.priority) return false;
+    if (state.review && question.review_flag !== state.review) return false;
+    if (state.tag && !question.tags.includes(state.tag)) return false;
+    if (state.method && !question.methods.includes(state.method)) return false;
+    return true;
+  });
+  if (!state.selectedId || !state.filtered.some(question => question.id === state.selectedId)) {
+    state.selectedId = state.filtered[0]?.id || "";
+  }
+  renderQuestionList();
+  renderQuestion(state.questions.find(question => question.id === state.selectedId));
+  writeHash();
+}
+
+function renderQuestionList() {
+  document.getElementById("result-count").textContent = `${state.filtered.length} / ${state.questions.length}`;
+  const list = document.getElementById("question-list");
+  list.innerHTML = state.filtered.map(question => `
+    <button class="question-card ${question.id === state.selectedId ? "is-selected" : ""}" type="button" data-id="${escapeHtml(question.id)}">
+      <div class="question-title">${escapeHtml(question.problem_number || "")} · ${escapeHtml(question.title)}</div>
+      <div class="question-meta">${pill(question.domain)}${pill(question.priority)}${pill(question.review_flag)}</div>
+      <div class="question-summary">${escapeHtml(question.first_reaction || question.basic_judgment || "")}</div>
+    </button>
+  `).join("");
+  list.querySelectorAll(".question-card").forEach(button => {
+    button.addEventListener("click", () => {
+      state.selectedId = button.dataset.id;
+      renderQuestionList();
+      renderQuestion(state.questions.find(question => question.id === state.selectedId));
+      writeHash();
+    });
+  });
+}
+
+function renderQuestion(question) {
+  const detail = document.getElementById("question-detail");
+  if (!question) {
+    detail.innerHTML = "<p>没有匹配的题目。</p>";
+    return;
+  }
+  detail.innerHTML = `
+    <h2>${escapeHtml(question.problem_number || "")} · ${escapeHtml(question.title)}</h2>
+    <div class="question-meta">${pill(question.domain)}${pill(question.priority)}${pill(question.review_flag)}${question.has_tikz ? pill("tikz source") : ""}</div>
+    <section class="detail-section">
+      <h3>题干</h3>
+      <div class="latex-block">${renderLatexText(question.stem_latex)}</div>
+    </section>
+    <section class="detail-section">
+      <h3>模式识别</h3>
+      <div class="card-grid">
+        ${infoCard("第一反应", question.first_reaction || question.basic_judgment)}
+        ${infoCard("关键变换", question.key_transformation)}
+        ${infoCard("训练用途", question.training_use)}
+        ${infoCard("通用模板", question.general_template)}
+      </div>
+      <div class="tag-list">${[...question.tags, ...question.methods].map(pill).join("")}</div>
+    </section>
+    <section class="detail-section">
+      <h3>解答</h3>
+      <div class="latex-block">${renderLatexText(question.solution_latex || "暂无解答。")}</div>
+    </section>
+    <section class="detail-section">
+      <h3>风险与来源</h3>
+      ${listBlock("常见陷阱", question.common_traps)}
+      ${listBlock("数据质量", question.data_quality_flags)}
+      <div class="source-block">
+        <div>id: ${escapeHtml(question.id)}</div>
+        <div>source: ${escapeHtml(question.source_id)}</div>
+        <div>legacy: ${escapeHtml(question.legacy_id || "")}</div>
+        <div>model: ${escapeHtml(question.translation_model || "")}</div>
+      </div>
+    </section>
+  `;
+  typesetMath();
+}
+
+function infoCard(title, value) {
+  return `<div class="info-card"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(value || "—")}</span></div>`;
+}
+
+function listBlock(title, values) {
+  if (!values || !values.length) return "";
+  return `<div class="info-card"><strong>${escapeHtml(title)}</strong><ul>${values.map(value => `<li>${escapeHtml(value)}</li>`).join("")}</ul></div>`;
+}
+
+function renderLatexText(text) {
+  if (!text) return "";
+  const escaped = escapeHtml(text).replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>");
+  const html = `<p>${escaped}</p>`;
+  if (text.includes("tikzpicture")) {
+    return html + `<pre class="tikz-source">${escapeHtml(text)}</pre>`;
+  }
+  return html;
+}
+
+function typesetMath() {
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise([document.getElementById("question-detail")]).catch(console.error);
+  }
+}
+
+function pill(text) {
+  return `<span class="badge">${escapeHtml(String(text || ""))}</span>`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+"""
 
 
 def main() -> None:

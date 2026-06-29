@@ -233,3 +233,25 @@ metadata:
 
     questions = json.loads((output_root / "docs/data/questions.json").read_text(encoding="utf-8"))
     assert questions[0]["id"] == "imported.amm_analysis_training_full_zh.p12403_2"
+
+
+def test_write_site_assets_contains_viewer_hooks(tmp_path):
+    from build_static_amm_site import write_site_assets
+
+    write_site_assets(tmp_path)
+
+    html = (tmp_path / "docs/index.html").read_text(encoding="utf-8")
+    css = (tmp_path / "docs/assets/site.css").read_text(encoding="utf-8")
+    js = (tmp_path / "docs/assets/site.js").read_text(encoding="utf-8")
+
+    assert "data/questions.json" in html
+    assert "MathJax" in html
+    assert 'id="search-input"' in html
+    assert 'id="domain-filters"' in html
+    assert 'id="question-list"' in html
+    assert 'id="question-detail"' in html
+    assert ".layout" in css
+    assert "function applyFilters" in js
+    assert "function renderQuestion" in js
+    assert "function parseHash" in js
+    assert "tikzpicture" in js
