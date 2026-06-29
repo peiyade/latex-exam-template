@@ -19,6 +19,7 @@ DEFAULT_MANIFEST_PATH = Path("analysis/amm_analysis_training_full_manifest.json"
 DEFAULT_OUTPUT_ROOT = Path("dist/amm-analysis-training")
 GENERATED_OUTPUT_ENTRIES = ("docs", "source", "tools", "README.md")
 PUBLIC_REPOSITORY_URL = "https://github.com/peiyade/amm-analysis-training"
+PUBLIC_SITE_URL = "https://peiyade.github.io/amm-analysis-training/"
 ASSET_VERSION = "20260629-mobile-reader-mode"
 
 
@@ -208,10 +209,58 @@ def write_site_assets(output_root: Path) -> None:
 
 
 def write_readme(output_root: Path, stats: Dict[str, Any]) -> None:
+    domains = json.dumps(stats.get("domains", {}), ensure_ascii=False, sort_keys=True)
+    priorities = json.dumps(stats.get("priorities", {}), ensure_ascii=False, sort_keys=True)
+    review_flags = json.dumps(stats.get("review_flags", {}), ensure_ascii=False, sort_keys=True)
     (output_root / "README.md").write_text(
-        "# AMM Analysis Training\n\n"
-        "Static GitHub Pages site for the AMM analysis / inequality / extremum training bank.\n\n"
-        f"Records: {stats['total']}\n",
+        f"""# AMM Analysis Training
+
+Static GitHub Pages site for the AMM analysis / inequality / extremum training bank.
+
+- Public site: {PUBLIC_SITE_URL}
+- Source repository: {PUBLIC_REPOSITORY_URL}
+- Records: {stats['total']}
+
+## Coverage
+
+- Domains: `{domains}`
+- Priorities: `{priorities}`
+- Review flags: `{review_flags}`
+
+## Repository Layout
+
+```text
+docs/                  GitHub Pages site
+docs/data/questions.json
+docs/data/stats.json
+source/bank-yaml/      exported YAML records
+source/audit.json      export audit snapshot
+source/manifest.json   translation manifest snapshot
+tools/build_static_site.py
+```
+
+The YAML records remain the source of truth. The static viewer is a generated distribution artifact for reading, sharing, and lightweight review.
+
+## Rebuild
+
+From this repository, rebuild the static site with:
+
+```bash
+python3 tools/build_static_site.py
+```
+
+In the original working repository, the equivalent command is:
+
+```bash
+python3 tools/build_static_amm_site.py --output-root dist/amm-analysis-training
+```
+
+## Notes
+
+- Math is rendered with MathJax from CDN.
+- TikZ snippets are shown as source fallback when direct rendering is not available.
+- `clean_required` means the translated/problem text should be manually checked before classroom use.
+""",
         encoding="utf-8",
     )
 

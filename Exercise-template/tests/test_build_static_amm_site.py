@@ -319,6 +319,27 @@ def test_write_site_assets_contains_viewer_hooks(tmp_path):
     assert 'replace(/\\n/g, "<br>")' not in js
 
 
+def test_write_readme_contains_reference_handoff_details(tmp_path):
+    from build_static_amm_site import write_readme
+
+    write_readme(
+        tmp_path,
+        {
+            "total": 981,
+            "domains": {"analysis": 609, "extremum": 59, "inequality": 313},
+            "priorities": {"high": 654, "low": 19, "medium": 308},
+            "review_flags": {"auto_ok": 343, "clean_required": 366, "needs_review": 272},
+        },
+    )
+
+    readme = (tmp_path / "README.md").read_text(encoding="utf-8")
+
+    assert "https://peiyade.github.io/amm-analysis-training/" in readme
+    assert "https://github.com/peiyade/amm-analysis-training" in readme
+    assert "Records: 981" in readme
+    assert "python3 tools/build_static_site.py" in readme
+
+
 def test_question_cards_are_links_and_open_detail_view(tmp_path):
     from build_static_amm_site import write_site_assets
 
