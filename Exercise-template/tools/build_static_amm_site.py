@@ -18,6 +18,7 @@ DEFAULT_AUDIT_PATH = Path("analysis/amm_analysis_training_full_audit.json")
 DEFAULT_MANIFEST_PATH = Path("analysis/amm_analysis_training_full_manifest.json")
 DEFAULT_OUTPUT_ROOT = Path("dist/amm-analysis-training")
 GENERATED_OUTPUT_ENTRIES = ("docs", "source", "tools", "README.md")
+ASSET_VERSION = "20260629-detail-links"
 
 
 REQUIRED_CURATION_FIELDS = ("main_domain", "priority_for_course", "review_flag")
@@ -197,7 +198,7 @@ def write_site_assets(output_root: Path) -> None:
     docs_root.mkdir(parents=True, exist_ok=True)
     assets_root.mkdir(parents=True, exist_ok=True)
     (docs_root / ".nojekyll").write_text("", encoding="utf-8")
-    (docs_root / "index.html").write_text(INDEX_HTML, encoding="utf-8")
+    (docs_root / "index.html").write_text(INDEX_HTML.replace("__ASSET_VERSION__", ASSET_VERSION), encoding="utf-8")
     (assets_root / "site.css").write_text(SITE_CSS, encoding="utf-8")
     (assets_root / "site.js").write_text(SITE_JS, encoding="utf-8")
 
@@ -228,7 +229,7 @@ INDEX_HTML = r"""<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AMM Analysis Training</title>
-  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/site.css?v=__ASSET_VERSION__">
   <script>
     window.MathJax = {
       tex: {
@@ -239,7 +240,7 @@ INDEX_HTML = r"""<!doctype html>
     };
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-  <script defer src="assets/site.js"></script>
+  <script defer src="assets/site.js?v=__ASSET_VERSION__"></script>
 </head>
 <body>
   <header class="topbar">
