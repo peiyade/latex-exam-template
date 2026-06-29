@@ -186,6 +186,7 @@ def write_site_assets(output_root: Path) -> None:
     assets_root = docs_root / "assets"
     docs_root.mkdir(parents=True, exist_ok=True)
     assets_root.mkdir(parents=True, exist_ok=True)
+    (docs_root / ".nojekyll").write_text("", encoding="utf-8")
     (docs_root / "index.html").write_text(INDEX_HTML, encoding="utf-8")
     (assets_root / "site.css").write_text(SITE_CSS, encoding="utf-8")
     (assets_root / "site.js").write_text(SITE_JS, encoding="utf-8")

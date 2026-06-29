@@ -246,6 +246,7 @@ def test_write_site_assets_contains_viewer_hooks(tmp_path):
 
     assert "data/questions.json" in html
     assert "MathJax" in html
+    assert (tmp_path / "docs/.nojekyll").exists()
     assert 'id="search-input"' in html
     assert 'id="domain-filters"' in html
     assert 'id="question-list"' in html
