@@ -334,6 +334,23 @@ def test_question_cards_are_links_and_open_detail_view(tmp_path):
     assert ".question-card:focus-visible" in css
 
 
+def test_mobile_reader_mode_hides_long_index_until_back_navigation(tmp_path):
+    from build_static_amm_site import write_site_assets
+
+    write_site_assets(tmp_path)
+
+    css = (tmp_path / "docs/assets/site.css").read_text(encoding="utf-8")
+    js = (tmp_path / "docs/assets/site.js").read_text(encoding="utf-8")
+
+    assert "body:not(.reader-open) .reader-panel" in css
+    assert "body.reader-open .filter-panel" in css
+    assert "body.reader-open .index-panel" in css
+    assert "readerOpen" in js
+    assert "function setReaderMode" in js
+    assert "setReaderMode(true)" in js
+    assert "setReaderMode(false)" in js
+
+
 def test_site_assets_expose_long_term_viewer_interface(tmp_path):
     from build_static_amm_site import write_site_assets
 

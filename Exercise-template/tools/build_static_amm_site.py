@@ -644,6 +644,13 @@ pre.tikz-source {
   h1 { font-size: 30px; }
   .layout { display: block; padding: 10px; }
   .filter-panel, .index-panel, .reader-panel { margin-bottom: 12px; }
+  body:not(.reader-open) .reader-panel { display: none; }
+  body.reader-open .filter-panel,
+  body.reader-open .index-panel { display: none; }
+  body.reader-open .reader-panel {
+    display: flex;
+    min-height: calc(100vh - 96px);
+  }
   .reader-toolbar { justify-content: flex-start; }
   .reader-content { padding: 22px 18px 28px; }
   .question-hero { display: block; }
@@ -664,7 +671,8 @@ SITE_JS = r"""const state = {
   priority: "",
   review: "",
   tag: "",
-  method: ""
+  method: "",
+  readerOpen: false
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -673,7 +681,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   state.questions.sort((a, b) => String(a.problem_number || "").localeCompare(String(b.problem_number || "")) || a.id.localeCompare(b.id));
   renderStats();
   hydrateControls();
-  Object.assign(state, parseHash());
+  const initialHashState = parseHash();
+  Object.assign(state, initialHashState);
+  setReaderMode(Boolean(initialHashState.selectedId));
   syncControlsFromState();
   applyFilters();
 });
@@ -696,9 +706,16 @@ function parseHash() {
 }
 
 function restoreStateFromHash() {
-  Object.assign(state, parseHash());
+  const hashState = parseHash();
+  Object.assign(state, hashState);
+  setReaderMode(Boolean(hashState.selectedId));
   syncControlsFromState();
   applyFilters({ skipHash: true });
+}
+
+function setReaderMode(open) {
+  state.readerOpen = Boolean(open);
+  document.body.classList.toggle("reader-open", state.readerOpen);
 }
 
 function buildHash(selectedId = state.selectedId) {
@@ -762,6 +779,7 @@ function hydrateControls() {
   document.getElementById("next-question").addEventListener("click", () => moveSelection(1));
   document.getElementById("copy-link-button").addEventListener("click", copyCurrentLink);
   document.getElementById("back-to-list").addEventListener("click", () => {
+    setReaderMode(false);
     document.querySelector(".index-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
@@ -774,6 +792,7 @@ function clearFilters() {
   state.tag = "";
   state.method = "";
   state.selectedId = "";
+  setReaderMode(false);
   syncControlsFromState();
   applyFilters();
 }
@@ -887,6 +906,7 @@ function selectQuestion(id, options = {}) {
   renderQuestion(state.questions.find(question => question.id === state.selectedId));
   renderReaderSummary();
   writeHash({ push: options.pushHistory });
+  if (options.scrollDetail) setReaderMode(true);
   if (options.revealIndex !== false) ensureSelectedCardVisible();
   if (options.scrollDetail) scrollDetailIntoView();
 }
@@ -1001,7 +1021,9 @@ function ensureSelectedCardVisible() {
 function scrollDetailIntoView() {
   const detail = document.getElementById("question-detail");
   if (!detail) return;
-  if (window.matchMedia("(max-width: 1180px)").matches) {
+  if (window.matchMedia("(max-width: 760px)").matches) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else if (window.matchMedia("(max-width: 1180px)").matches) {
     detail.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
