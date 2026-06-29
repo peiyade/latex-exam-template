@@ -83,6 +83,18 @@ def test_normalize_question_detects_tikz():
     assert normalize_question(record)["has_tikz"] is True
 
 
+def test_normalize_question_adds_public_source_links():
+    from build_static_amm_site import normalize_question
+
+    normalized = normalize_question(sample_record())
+
+    assert normalized["yaml_file"] == "p12403_2.yaml"
+    assert (
+        normalized["github_source_url"]
+        == "https://github.com/peiyade/amm-analysis-training/blob/main/source/bank-yaml/p12403_2.yaml"
+    )
+
+
 def test_compute_stats_counts_domain_priority_review_and_tags():
     from build_static_amm_site import compute_stats, normalize_question
 
@@ -320,6 +332,48 @@ def test_question_cards_are_links_and_open_detail_view(tmp_path):
     assert "function selectQuestion(id, options = {})" in js
     assert "scrollIntoView" in js
     assert ".question-card:focus-visible" in css
+
+
+def test_site_assets_expose_long_term_viewer_interface(tmp_path):
+    from build_static_amm_site import write_site_assets
+
+    write_site_assets(tmp_path)
+
+    html = (tmp_path / "docs/index.html").read_text(encoding="utf-8")
+    css = (tmp_path / "docs/assets/site.css").read_text(encoding="utf-8")
+    js = (tmp_path / "docs/assets/site.js").read_text(encoding="utf-8")
+
+    for expected in (
+        'class="site-shell"',
+        'id="active-facets"',
+        'id="reader-tools"',
+        'id="prev-question"',
+        'id="next-question"',
+        'id="copy-link-button"',
+        'id="reader-summary"',
+    ):
+        assert expected in html
+
+    for expected in (
+        "--ink:",
+        "--paper:",
+        ".reader-panel",
+        ".reader-toolbar",
+        ".index-card",
+        ".facet-strip",
+        ".detail-grid",
+    ):
+        assert expected in css
+
+    for expected in (
+        "function renderActiveFacets",
+        "function renderReaderSummary",
+        "function moveSelection",
+        "function copyCurrentLink",
+        "function githubSourceLink",
+        "navigator.clipboard.writeText",
+    ):
+        assert expected in js
 
 
 def test_build_site_preserves_existing_git_directory(tmp_path):
