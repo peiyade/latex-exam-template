@@ -110,6 +110,51 @@ def write_yaml(path, text):
     path.write_text(text.strip() + "\n", encoding="utf-8")
 
 
+def write_minimal_bank(tmp_path):
+    zh_root = tmp_path / "zh"
+    source_root = tmp_path / "source"
+    zh_root.mkdir()
+    source_root.mkdir()
+    write_yaml(
+        zh_root / "q1.yaml",
+        """
+id: q1
+status: machine_draft
+type: solution
+source:
+  translation_of: s1
+stem_latex: |-
+  设 $x$ 为实数。
+solution_latex: |-
+  解答。
+comment: "测试题"
+metadata:
+  problem_number: 1
+  curation:
+    main_domain: analysis
+    priority_for_course: high
+    review_flag: auto_ok
+""",
+    )
+    write_yaml(source_root / "q1.yaml", "id: s1")
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    audit_path.write_text(
+        json.dumps(
+            {
+                "source_count": 1,
+                "translated_count": 1,
+                "missing_translation_count": 0,
+                "failure_count": 0,
+                "format_issues": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest_path.write_text(json.dumps({"records": []}), encoding="utf-8")
+    return zh_root, source_root, audit_path, manifest_path
+
+
 def test_validate_audit_rejects_incomplete_bank():
     from build_static_amm_site import validate_audit
 
@@ -258,6 +303,36 @@ def test_write_site_assets_contains_viewer_hooks(tmp_path):
     assert "function parseHash" in js
     assert "tikzpicture" in js
     assert 'replace(/\\n/g, "<br>")' not in js
+
+
+def test_question_cards_are_links_and_open_detail_view(tmp_path):
+    from build_static_amm_site import write_site_assets
+
+    write_site_assets(tmp_path)
+
+    js = (tmp_path / "docs/assets/site.js").read_text(encoding="utf-8")
+    css = (tmp_path / "docs/assets/site.css").read_text(encoding="utf-8")
+
+    assert '<a class="question-card' in js
+    assert 'href="${questionHash(question.id)}"' in js
+    assert "function selectQuestion(id, options = {})" in js
+    assert "scrollIntoView" in js
+    assert ".question-card:focus-visible" in css
+
+
+def test_build_site_preserves_existing_git_directory(tmp_path):
+    from build_static_amm_site import build_site
+
+    zh_root, source_root, audit_path, manifest_path = write_minimal_bank(tmp_path)
+    output_root = tmp_path / "site"
+    git_root = output_root / ".git"
+    git_root.mkdir(parents=True)
+    (git_root / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+
+    build_site(output_root, zh_root, source_root, audit_path, manifest_path, copy_yaml=False)
+
+    assert (git_root / "HEAD").read_text(encoding="utf-8") == "ref: refs/heads/main\n"
+    assert (output_root / "docs/index.html").exists()
 
 
 def test_real_bank_export_has_expected_counts_when_data_exists(tmp_path):

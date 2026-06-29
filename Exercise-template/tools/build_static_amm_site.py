@@ -17,6 +17,7 @@ DEFAULT_SOURCE_ROOT = Path("bank/_curated/amm_analysis_training_full_source")
 DEFAULT_AUDIT_PATH = Path("analysis/amm_analysis_training_full_audit.json")
 DEFAULT_MANIFEST_PATH = Path("analysis/amm_analysis_training_full_manifest.json")
 DEFAULT_OUTPUT_ROOT = Path("dist/amm-analysis-training")
+GENERATED_OUTPUT_ENTRIES = ("docs", "source", "tools", "README.md")
 
 
 REQUIRED_CURATION_FIELDS = ("main_domain", "priority_for_course", "review_flag")
@@ -146,8 +147,7 @@ def build_site(
     questions = load_questions(zh_root)
     stats = compute_stats(questions)
 
-    if output_root.exists():
-        shutil.rmtree(output_root)
+    prepare_output_root(output_root)
     (output_root / "docs/assets").mkdir(parents=True, exist_ok=True)
     (output_root / "docs/data").mkdir(parents=True, exist_ok=True)
     (output_root / "source").mkdir(parents=True, exist_ok=True)
@@ -163,6 +163,16 @@ def build_site(
     write_readme(output_root, stats)
     write_builder_copy(output_root)
     return {"records": len(questions), "stats": stats, "output_root": str(output_root)}
+
+
+def prepare_output_root(output_root: Path) -> None:
+    output_root.mkdir(parents=True, exist_ok=True)
+    for entry in GENERATED_OUTPUT_ENTRIES:
+        target = output_root / entry
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target)
+        elif target.exists() or target.is_symlink():
+            target.unlink()
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -350,10 +360,14 @@ input, select, button {
   border: 0;
   border-bottom: 1px solid #d5dfda;
   background: transparent;
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
   padding: 14px 12px;
   cursor: pointer;
 }
 .question-card.is-selected { background: #e2eee9; box-shadow: inset 3px 0 0 #0a665a; }
+.question-card:focus-visible { outline: 3px solid #0a665a; outline-offset: -3px; }
 .question-title { font-size: 18px; font-weight: 800; line-height: 1.2; margin-bottom: 7px; }
 .question-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 7px; }
 .question-summary { color: #52615b; font-size: 14px; line-height: 1.45; }
@@ -406,6 +420,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   applyFilters();
 });
 
+window.addEventListener("popstate", restoreStateFromHash);
+window.addEventListener("hashchange", restoreStateFromHash);
+
 function parseHash() {
   const hash = window.location.hash.replace(/^#/, "");
   const params = new URLSearchParams(hash);
@@ -420,16 +437,37 @@ function parseHash() {
   };
 }
 
-function writeHash() {
+function restoreStateFromHash() {
+  Object.assign(state, parseHash());
+  syncControlsFromState();
+  applyFilters({ skipHash: true });
+}
+
+function buildHash(selectedId = state.selectedId) {
   const params = new URLSearchParams();
-  if (state.selectedId) params.set("q", state.selectedId);
+  if (selectedId) params.set("q", selectedId);
   if (state.search) params.set("s", state.search);
   if (state.domain) params.set("domain", state.domain);
   if (state.priority) params.set("priority", state.priority);
   if (state.review) params.set("review", state.review);
   if (state.tag) params.set("tag", state.tag);
   if (state.method) params.set("method", state.method);
-  window.history.replaceState(null, "", "#" + params.toString());
+  return "#" + params.toString();
+}
+
+function questionHash(id) {
+  return buildHash(id);
+}
+
+function writeHash(options = {}) {
+  const hash = buildHash();
+  if (window.location.hash === hash) return;
+  const url = window.location.pathname + window.location.search + hash;
+  if (options.push) {
+    window.history.pushState(null, "", url);
+  } else {
+    window.history.replaceState(null, "", url);
+  }
 }
 
 function renderStats() {
@@ -505,7 +543,7 @@ function syncControlsFromState() {
   });
 }
 
-function applyFilters() {
+function applyFilters(options = {}) {
   state.filtered = state.questions.filter(question => {
     if (state.search && !question.search_text.includes(state.search)) return false;
     if (state.domain && question.domain !== state.domain) return false;
@@ -520,27 +558,35 @@ function applyFilters() {
   }
   renderQuestionList();
   renderQuestion(state.questions.find(question => question.id === state.selectedId));
-  writeHash();
+  if (!options.skipHash) writeHash();
 }
 
 function renderQuestionList() {
   document.getElementById("result-count").textContent = `${state.filtered.length} / ${state.questions.length}`;
   const list = document.getElementById("question-list");
   list.innerHTML = state.filtered.map(question => `
-    <button class="question-card ${question.id === state.selectedId ? "is-selected" : ""}" type="button" data-id="${escapeHtml(question.id)}">
+    <a class="question-card ${question.id === state.selectedId ? "is-selected" : ""}" href="${questionHash(question.id)}" data-id="${escapeHtml(question.id)}" aria-current="${question.id === state.selectedId ? "true" : "false"}">
       <div class="question-title">${escapeHtml(question.problem_number || "")} · ${escapeHtml(question.title)}</div>
       <div class="question-meta">${pill(question.domain)}${pill(question.priority)}${pill(question.review_flag)}</div>
       <div class="question-summary">${escapeHtml(question.first_reaction || question.basic_judgment || "")}</div>
-    </button>
+    </a>
   `).join("");
-  list.querySelectorAll(".question-card").forEach(button => {
-    button.addEventListener("click", () => {
-      state.selectedId = button.dataset.id;
-      renderQuestionList();
-      renderQuestion(state.questions.find(question => question.id === state.selectedId));
-      writeHash();
+  list.querySelectorAll(".question-card").forEach(link => {
+    link.addEventListener("click", event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      selectQuestion(link.dataset.id, { pushHistory: true, scrollDetail: true });
     });
   });
+}
+
+function selectQuestion(id, options = {}) {
+  if (!id) return;
+  state.selectedId = id;
+  renderQuestionList();
+  renderQuestion(state.questions.find(question => question.id === state.selectedId));
+  writeHash({ push: options.pushHistory });
+  if (options.scrollDetail) scrollDetailIntoView();
 }
 
 function renderQuestion(question) {
@@ -582,7 +628,16 @@ function renderQuestion(question) {
       </div>
     </section>
   `;
+  detail.scrollTop = 0;
   typesetMath();
+}
+
+function scrollDetailIntoView() {
+  const detail = document.getElementById("question-detail");
+  if (!detail) return;
+  if (window.matchMedia("(max-width: 1100px)").matches) {
+    detail.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function infoCard(title, value) {
