@@ -96,3 +96,131 @@ def count_values(values: Iterable[str]) -> Dict[str, int]:
             continue
         counts[value] = counts.get(value, 0) + 1
     return dict(sorted(counts.items()))
+
+
+def load_questions(zh_root: Path) -> List[Dict[str, Any]]:
+    records = [load_question_file(path) for path in sorted(zh_root.glob("*.yaml"))]
+    questions = [normalize_question(record) for record in records]
+    questions.sort(key=lambda item: (str(item.get("problem_number", "")), item["id"]))
+    validate_questions(questions)
+    return questions
+
+
+def validate_questions(questions: List[Dict[str, Any]]) -> None:
+    if not questions:
+        raise ValueError("no questions loaded")
+    for question in questions:
+        for field in ("id", "title", "domain", "priority", "review_flag", "stem_latex"):
+            if not question.get(field):
+                raise ValueError(f"{question.get('id', '<unknown>')}: missing required field {field}")
+
+
+def read_json(path: Path) -> Dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def validate_audit(audit: Dict[str, Any]) -> None:
+    if audit.get("source_count") != audit.get("translated_count"):
+        raise ValueError(
+            "audit source_count and translated_count differ: "
+            f"{audit.get('source_count')} != {audit.get('translated_count')}"
+        )
+    if audit.get("missing_translation_count") != 0:
+        raise ValueError(f"audit missing_translation_count is {audit.get('missing_translation_count')}")
+    if audit.get("failure_count") != 0:
+        raise ValueError(f"audit failure_count is {audit.get('failure_count')}")
+    if audit.get("format_issues"):
+        raise ValueError(f"audit format_issues is not empty: {audit.get('format_issues')}")
+
+
+def build_site(
+    output_root: Path,
+    zh_root: Path,
+    source_root: Path,
+    audit_path: Path,
+    manifest_path: Path,
+    copy_yaml: bool = True,
+) -> Dict[str, Any]:
+    audit = read_json(audit_path)
+    validate_audit(audit)
+    questions = load_questions(zh_root)
+    stats = compute_stats(questions)
+
+    if output_root.exists():
+        shutil.rmtree(output_root)
+    (output_root / "docs/assets").mkdir(parents=True, exist_ok=True)
+    (output_root / "docs/data").mkdir(parents=True, exist_ok=True)
+    (output_root / "source").mkdir(parents=True, exist_ok=True)
+
+    write_json(output_root / "docs/data/questions.json", questions)
+    write_json(output_root / "docs/data/stats.json", stats)
+    shutil.copy2(audit_path, output_root / "source/audit.json")
+    shutil.copy2(manifest_path, output_root / "source/manifest.json")
+    if copy_yaml:
+        copy_bank_yaml(zh_root, output_root / "source/bank-yaml")
+
+    write_site_assets(output_root)
+    write_readme(output_root, stats)
+    write_builder_copy(output_root)
+    return {"records": len(questions), "stats": stats, "output_root": str(output_root)}
+
+
+def write_json(path: Path, value: Any) -> None:
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def copy_bank_yaml(zh_root: Path, target_root: Path) -> None:
+    target_root.mkdir(parents=True, exist_ok=True)
+    for source_path in sorted(zh_root.glob("*.yaml")):
+        shutil.copy2(source_path, target_root / source_path.name)
+
+
+def write_builder_copy(output_root: Path) -> None:
+    tools_dir = output_root / "tools"
+    tools_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(Path(__file__), tools_dir / "build_static_site.py")
+
+
+def write_site_assets(output_root: Path) -> None:
+    (output_root / "docs/index.html").write_text(
+        "<!doctype html><meta charset='utf-8'><title>AMM Analysis Training</title>"
+        "<main id='app'>AMM Analysis Training</main>"
+        "<script src='assets/site.js'></script>\n",
+        encoding="utf-8",
+    )
+    (output_root / "docs/assets/site.css").write_text("body { font-family: serif; }\n", encoding="utf-8")
+    (output_root / "docs/assets/site.js").write_text("console.log('AMM site');\n", encoding="utf-8")
+
+
+def write_readme(output_root: Path, stats: Dict[str, Any]) -> None:
+    (output_root / "README.md").write_text(
+        "# AMM Analysis Training\n\n"
+        "Static GitHub Pages site for the AMM analysis / inequality / extremum training bank.\n\n"
+        f"Records: {stats['total']}\n",
+        encoding="utf-8",
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Build AMM static GitHub Pages site.")
+    parser.add_argument("--zh-root", type=Path, default=DEFAULT_ZH_ROOT)
+    parser.add_argument("--source-root", type=Path, default=DEFAULT_SOURCE_ROOT)
+    parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT_PATH)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
+    parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
+    parser.add_argument("--no-copy-yaml", action="store_true")
+    args = parser.parse_args()
+
+    summary = build_site(
+        args.output_root,
+        args.zh_root,
+        args.source_root,
+        args.audit,
+        args.manifest,
+        copy_yaml=not args.no_copy_yaml,
+    )
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

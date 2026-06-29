@@ -1,3 +1,4 @@
+import json
 import sys
 from pathlib import Path
 
@@ -103,3 +104,132 @@ def test_compute_stats_counts_domain_priority_review_and_tags():
     assert stats["review_flags"] == {"auto_ok": 1, "needs_review": 1}
     assert stats["tags"]["五变量不等式"] == 1
     assert stats["tags"]["极限"] == 1
+
+
+def write_yaml(path, text):
+    path.write_text(text.strip() + "\n", encoding="utf-8")
+
+
+def test_validate_audit_rejects_incomplete_bank():
+    from build_static_amm_site import validate_audit
+
+    audit = {
+        "source_count": 981,
+        "translated_count": 980,
+        "missing_translation_count": 1,
+        "failure_count": 0,
+        "format_issues": [],
+    }
+
+    try:
+        validate_audit(audit)
+    except ValueError as exc:
+        assert "translated_count" in str(exc) or "missing_translation_count" in str(exc)
+    else:
+        raise AssertionError("validate_audit should reject incomplete translated bank")
+
+
+def test_validate_audit_rejects_unresolved_failures_and_format_issues():
+    from build_static_amm_site import validate_audit
+
+    audit = {
+        "source_count": 981,
+        "translated_count": 981,
+        "missing_translation_count": 0,
+        "failure_count": 1,
+        "format_issues": [{"id": "q1", "issue": "text_mode_linebreak"}],
+    }
+
+    try:
+        validate_audit(audit)
+    except ValueError as exc:
+        assert "failure_count" in str(exc) or "format_issues" in str(exc)
+    else:
+        raise AssertionError("validate_audit should reject unresolved failures")
+
+
+def test_build_site_writes_static_files_and_source_metadata(tmp_path):
+    from build_static_amm_site import build_site
+
+    zh_root = tmp_path / "zh"
+    source_root = tmp_path / "source"
+    output_root = tmp_path / "site"
+    zh_root.mkdir()
+    source_root.mkdir()
+
+    write_yaml(
+        zh_root / "p12403_2.yaml",
+        """
+schema_version: 1
+id: imported.amm_analysis_training_full_zh.p12403_2
+status: machine_draft
+type: solution
+source:
+  translation_of: imported.amm_analysis_training_full_source.p12403_2
+  legacy_id: amm#12403
+stem_latex: |-
+  设 $a$ 为实数。
+solution_latex: |-
+  由 AM-GM 得证。
+comment: "五参数不等式族"
+metadata:
+  problem_number: 12403
+  section_title: "A Family of Five-Parameter Inequalities"
+  curation:
+    main_domain: inequality
+    priority_for_course: high
+    review_flag: needs_review
+    basic_judgment: "核心题目。"
+    structure_tags:
+      - "五变量不等式"
+    candidate_methods:
+      - AM-GM
+    data_quality_flags: []
+  training_card:
+    recognition_cues:
+      - "倒数和"
+    first_reaction: "先排序。"
+    key_transformation: "排序。"
+    solution_skeleton:
+      - "排序"
+    common_traps: []
+    general_template: "先找极端结构。"
+    training_use: "训练。"
+    human_notes: ""
+  translation:
+    model: manual:codex-reviewed
+    review_status: machine_draft
+""",
+    )
+    write_yaml(source_root / "p12403_2.yaml", "id: imported.amm_analysis_training_full_source.p12403_2")
+
+    audit_path = tmp_path / "audit.json"
+    manifest_path = tmp_path / "manifest.json"
+    audit_path.write_text(
+        json.dumps(
+            {
+                "source_count": 1,
+                "translated_count": 1,
+                "missing_translation_count": 0,
+                "failure_count": 0,
+                "format_issues": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest_path.write_text(json.dumps({"records": []}), encoding="utf-8")
+
+    summary = build_site(output_root, zh_root, source_root, audit_path, manifest_path, copy_yaml=True)
+
+    assert summary["records"] == 1
+    assert (output_root / "docs/index.html").exists()
+    assert (output_root / "docs/assets/site.css").exists()
+    assert (output_root / "docs/assets/site.js").exists()
+    assert (output_root / "docs/data/questions.json").exists()
+    assert (output_root / "docs/data/stats.json").exists()
+    assert (output_root / "source/manifest.json").exists()
+    assert (output_root / "source/audit.json").exists()
+    assert (output_root / "source/bank-yaml/p12403_2.yaml").exists()
+
+    questions = json.loads((output_root / "docs/data/questions.json").read_text(encoding="utf-8"))
+    assert questions[0]["id"] == "imported.amm_analysis_training_full_zh.p12403_2"
