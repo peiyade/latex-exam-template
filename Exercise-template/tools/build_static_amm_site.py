@@ -19,7 +19,7 @@ DEFAULT_MANIFEST_PATH = Path("analysis/amm_analysis_training_full_manifest.json"
 DEFAULT_OUTPUT_ROOT = Path("dist/amm-analysis-training")
 GENERATED_OUTPUT_ENTRIES = ("docs", "source", "tools", "README.md")
 PUBLIC_REPOSITORY_URL = "https://github.com/peiyade/amm-analysis-training"
-ASSET_VERSION = "20260629-reader-viewer"
+ASSET_VERSION = "20260629-mobile-reader-mode"
 
 
 REQUIRED_CURATION_FIELDS = ("main_domain", "priority_for_course", "review_flag")
