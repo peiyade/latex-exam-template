@@ -251,7 +251,66 @@ def test_write_site_assets_contains_viewer_hooks(tmp_path):
     assert 'id="question-list"' in html
     assert 'id="question-detail"' in html
     assert ".layout" in css
+    assert "white-space: pre-wrap" in css
     assert "function applyFilters" in js
     assert "function renderQuestion" in js
     assert "function parseHash" in js
     assert "tikzpicture" in js
+    assert 'replace(/\\n/g, "<br>")' not in js
+
+
+def test_real_bank_export_has_expected_counts_when_data_exists(tmp_path):
+    from build_static_amm_site import (
+        DEFAULT_AUDIT_PATH,
+        DEFAULT_MANIFEST_PATH,
+        DEFAULT_SOURCE_ROOT,
+        DEFAULT_ZH_ROOT,
+        build_site,
+    )
+
+    if not DEFAULT_ZH_ROOT.exists() or not DEFAULT_AUDIT_PATH.exists():
+        return
+
+    output_root = tmp_path / "export"
+    summary = build_site(
+        output_root,
+        DEFAULT_ZH_ROOT,
+        DEFAULT_SOURCE_ROOT,
+        DEFAULT_AUDIT_PATH,
+        DEFAULT_MANIFEST_PATH,
+        copy_yaml=False,
+    )
+
+    assert summary["records"] == 981
+    questions = json.loads((output_root / "docs/data/questions.json").read_text(encoding="utf-8"))
+    assert len(questions) == 981
+    assert any(question["domain"] == "inequality" and question["priority"] == "high" for question in questions)
+    assert any(question["domain"] == "analysis" for question in questions)
+    assert any(question["review_flag"] == "clean_required" for question in questions)
+
+
+def test_summarize_for_cli_omits_large_tag_maps():
+    from build_static_amm_site import summarize_for_cli
+
+    summary = {
+        "records": 2,
+        "output_root": "dist/amm-analysis-training",
+        "stats": {
+            "total": 2,
+            "domains": {"analysis": 1, "inequality": 1},
+            "priorities": {"high": 1, "medium": 1},
+            "review_flags": {"auto_ok": 1, "needs_review": 1},
+            "tags": {"very long tag": 1},
+            "methods": {"very long method": 1},
+        },
+    }
+
+    cli_summary = summarize_for_cli(summary)
+
+    assert cli_summary == {
+        "records": 2,
+        "output_root": "dist/amm-analysis-training",
+        "domains": {"analysis": 1, "inequality": 1},
+        "priorities": {"high": 1, "medium": 1},
+        "review_flags": {"auto_ok": 1, "needs_review": 1},
+    }

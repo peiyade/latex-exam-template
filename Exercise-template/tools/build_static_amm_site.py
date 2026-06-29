@@ -200,6 +200,17 @@ def write_readme(output_root: Path, stats: Dict[str, Any]) -> None:
     )
 
 
+def summarize_for_cli(summary: Dict[str, Any]) -> Dict[str, Any]:
+    stats = summary.get("stats", {})
+    return {
+        "records": summary.get("records"),
+        "output_root": summary.get("output_root"),
+        "domains": stats.get("domains", {}),
+        "priorities": stats.get("priorities", {}),
+        "review_flags": stats.get("review_flags", {}),
+    }
+
+
 INDEX_HTML = r"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -349,7 +360,7 @@ input, select, button {
 .detail h2 { font-size: 34px; line-height: 1.08; margin: 0 0 12px; }
 .detail-section { border-top: 1px solid #b8c8c0; padding-top: 18px; margin-top: 20px; }
 .detail-section h3 { margin: 0 0 10px; color: #0a665a; font-size: 18px; }
-.latex-block { font-size: 19px; line-height: 1.85; overflow-x: auto; }
+.latex-block { font-size: 19px; line-height: 1.85; overflow-x: auto; white-space: pre-wrap; }
 .card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .info-card { border: 1px solid #b8c8c0; padding: 12px; background: #f6f9f7; }
 .info-card strong { display: block; margin-bottom: 6px; color: #52615b; }
@@ -584,8 +595,7 @@ function listBlock(title, values) {
 
 function renderLatexText(text) {
   if (!text) return "";
-  const escaped = escapeHtml(text).replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>");
-  const html = `<p>${escaped}</p>`;
+  const html = `<div>${escapeHtml(text)}</div>`;
   if (text.includes("tikzpicture")) {
     return html + `<pre class="tikz-source">${escapeHtml(text)}</pre>`;
   }
@@ -630,7 +640,7 @@ def main() -> None:
         args.manifest,
         copy_yaml=not args.no_copy_yaml,
     )
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    print(json.dumps(summarize_for_cli(summary), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
