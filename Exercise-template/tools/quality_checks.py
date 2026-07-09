@@ -205,10 +205,10 @@ def latex_fields(record: QuestionRecord) -> List[Tuple[str, str]]:
     ]
     for index, choice in enumerate(record.choices):
         if isinstance(choice, dict):
-            fields.append((f"choices[{index}].text_latex", str(choice.get("text_latex", ""))))
+            fields.append((f"choices[{index}].text_latex", _text_or_empty(choice.get("text_latex"))))
     for index, answer in enumerate(record.answers):
         if isinstance(answer, dict):
-            fields.append((f"answers[{index}].latex", str(answer.get("latex", ""))))
+            fields.append((f"answers[{index}].latex", _text_or_empty(answer.get("latex"))))
     return [(field, text) for field, text in fields if text]
 
 
@@ -234,6 +234,12 @@ def _excerpt(text: str, start: int, radius: int = 80) -> str:
     left = max(0, start - radius)
     right = min(len(text), start + radius)
     return re.sub(r"\s+", " ", text[left:right]).strip()
+
+
+def _text_or_empty(value: object) -> str:
+    if value is None:
+        return ""
+    return str(value)
 
 
 def _valid_nested_dicts(

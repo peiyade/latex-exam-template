@@ -152,6 +152,21 @@ def test_latex_fields_skips_malformed_nested_items():
     assert all("bad-choice" not in text and "bad-answer" not in text for _, text in fields)
 
 
+def test_latex_fields_skips_null_nested_latex_fields():
+    from quality_checks import latex_fields
+
+    fields = latex_fields(
+        record(
+            type="choice",
+            choices=[{"key": "opt1", "text_latex": None}],
+            answers=[{"key": "blank1", "latex": None}],
+        )
+    )
+
+    assert all(text != "None" for _, text in fields)
+    assert all(not field.startswith(("choices[", "answers[")) for field, _ in fields)
+
+
 def test_known_bad_pattern_checker_flags_amm_footer_material():
     from quality_checks import check_known_bad_patterns
 
