@@ -41,6 +41,32 @@ def test_normalize_question_preserves_expected_fields(tmp_path):
     assert normalized.review_flag == "auto_ok"
 
 
+def test_normalize_question_converts_null_text_fields_to_empty_strings(tmp_path):
+    from quality_core import normalize_question
+
+    normalized = normalize_question(
+        {
+            "schema_version": 1,
+            "id": None,
+            "status": None,
+            "type": None,
+            "stem_latex": None,
+            "explanation_latex": None,
+            "solution_latex": None,
+            "comment": None,
+        },
+        tmp_path / "q001.yaml",
+    )
+
+    assert normalized.id == ""
+    assert normalized.status == ""
+    assert normalized.type == ""
+    assert normalized.stem_latex == ""
+    assert normalized.explanation_latex == ""
+    assert normalized.solution_latex == ""
+    assert normalized.comment == ""
+
+
 def test_load_yaml_bank_returns_records_and_parse_issues(tmp_path):
     from quality_core import load_yaml_bank
 

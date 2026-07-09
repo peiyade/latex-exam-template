@@ -163,3 +163,24 @@ def test_run_render_checks_uses_cache_after_success(tmp_path):
     assert first == []
     assert second == []
     assert calls["count"] == 1
+
+
+def test_run_render_checks_uses_cache_after_failed_compile(tmp_path):
+    from quality_render import RenderOptions, run_render_checks
+
+    calls = {"count": 0}
+
+    def fake_runner(*args, **kwargs):
+        calls["count"] += 1
+        return subprocess.CompletedProcess(args=args[0], returncode=1, stdout="! Undefined control sequence.", stderr="")
+
+    options = RenderOptions(mode="full", output_dir=tmp_path, keep_workdir=True)
+    first = run_render_checks([record("q1")], [], options, runner=fake_runner, which=lambda name: "/usr/bin/xelatex")
+    second = run_render_checks([record("q1")], [], options, runner=fake_runner, which=lambda name: "/usr/bin/xelatex")
+
+    assert len(first) == 1
+    assert len(second) == 1
+    assert first[0].id == "render.compile_failed"
+    assert second[0].id == "render.compile_failed"
+    assert "Undefined control sequence" in second[0].message
+    assert calls["count"] == 1

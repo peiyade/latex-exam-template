@@ -69,18 +69,18 @@ def normalize_question(raw: Dict[str, Any], source_path: Path) -> QuestionRecord
     source = raw.get("source", {})
     metadata = raw.get("metadata", {})
     return QuestionRecord(
-        id=str(raw.get("id", "")),
+        id=_text_or_empty(raw.get("id")),
         source_path=source_path,
         source_metadata=dict(source) if isinstance(source, dict) else {},
         schema_version=raw.get("schema_version") if isinstance(raw.get("schema_version"), int) else None,
-        status=str(raw.get("status", "")),
-        type=str(raw.get("type", "")),
-        stem_latex=str(raw.get("stem_latex", "")),
+        status=_text_or_empty(raw.get("status")),
+        type=_text_or_empty(raw.get("type")),
+        stem_latex=_text_or_empty(raw.get("stem_latex")),
         choices=list(raw.get("choices", []) or []),
         answers=list(raw.get("answers", []) or []),
-        explanation_latex=str(raw.get("explanation_latex", "")),
-        solution_latex=str(raw.get("solution_latex", "")),
-        comment=str(raw.get("comment", "")),
+        explanation_latex=_text_or_empty(raw.get("explanation_latex")),
+        solution_latex=_text_or_empty(raw.get("solution_latex")),
+        comment=_text_or_empty(raw.get("comment")),
         metadata=dict(metadata) if isinstance(metadata, dict) else {},
         raw=raw,
     )
@@ -127,3 +127,9 @@ def should_fail(issues: Iterable[QualityIssue], fail_on: str = "high") -> bool:
         raise ValueError(f"unknown fail threshold: {fail_on}")
     threshold = SEVERITY_ORDER[fail_on]
     return any(SEVERITY_ORDER[issue.severity] >= threshold for issue in issues)
+
+
+def _text_or_empty(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value)

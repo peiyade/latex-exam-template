@@ -117,22 +117,10 @@ def run_render_checks(
         key = render_cache_key(record, document)
         cache_path = options.cache_dir / f"{key}.json"
         cached = _read_cache(cache_path)
-        if cached and cached.get("success") is True:
-            warning_excerpt = str(cached.get("warning_excerpt", "")).strip()
-            if warning_excerpt:
-                artifacts = _cached_artifacts(cached)
-                issues.append(
-                    QualityIssue(
-                        id="render.warning",
-                        severity="medium",
-                        question_id=record.id,
-                        field="render",
-                        message=f"xelatex produced warnings: {warning_excerpt}",
-                        evidence={"warning_excerpt": warning_excerpt},
-                        source_path=record.source_path,
-                        render_artifacts=artifacts,
-                    )
-                )
+        if cached:
+            cached_issue = _issue_from_cached_result(record, cached)
+            if cached_issue:
+                issues.append(cached_issue)
             continue
 
         result = _compile_document(record, document, Path(xelatex), options, runner)
@@ -262,6 +250,36 @@ def _write_cache(path: Path, result: RenderResult) -> None:
         + "\n",
         encoding="utf-8",
     )
+
+
+def _issue_from_cached_result(record: QuestionRecord, cached: Dict[str, Any]) -> Optional[QualityIssue]:
+    artifacts = _cached_artifacts(cached)
+    if cached.get("success") is False:
+        log_excerpt = str(cached.get("log_excerpt", "")).strip() or "cached xelatex failure"
+        return QualityIssue(
+            id="render.compile_failed",
+            severity="critical",
+            question_id=record.id,
+            field="render",
+            message=f"LaTeX render failed: {log_excerpt}",
+            evidence={"returncode": cached.get("returncode")},
+            source_path=record.source_path,
+            render_artifacts=artifacts,
+        )
+    if cached.get("success") is True:
+        warning_excerpt = str(cached.get("warning_excerpt", "")).strip()
+        if warning_excerpt:
+            return QualityIssue(
+                id="render.warning",
+                severity="medium",
+                question_id=record.id,
+                field="render",
+                message=f"xelatex produced warnings: {warning_excerpt}",
+                evidence={"warning_excerpt": warning_excerpt},
+                source_path=record.source_path,
+                render_artifacts=artifacts,
+            )
+    return None
 
 
 def _log_excerpt(output: str, limit: int = 500) -> str:
