@@ -46,9 +46,9 @@ class RenderResult:
 
 
 def build_render_document(record: QuestionRecord) -> str:
-    body_parts = [rf"\section*{{{_latex_escape(record.id)}}}"]
+    body_parts = [_render_label(record.id)]
     for field, text in latex_fields(record):
-        body_parts.append(rf"\subsection*{{{_latex_escape(field)}}}")
+        body_parts.append(_render_label(field))
         body_parts.append(text)
     return RENDER_PREAMBLE + "\n".join(body_parts) + "\n\\end{document}\n"
 
@@ -318,8 +318,11 @@ def _latex_escape(value: str) -> str:
     return value.replace("\\", r"\textbackslash{}").replace("_", r"\_").replace("#", r"\#")
 
 
+def _render_label(value: str) -> str:
+    return rf"\par\noindent\textbf{{{_latex_escape(value)}}}\par"
+
+
 RENDER_PREAMBLE = r"""\documentclass[border=10pt]{standalone}
-\usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb}
 \usepackage{unicode-math}
 \usepackage[fontset=fandol]{ctex}

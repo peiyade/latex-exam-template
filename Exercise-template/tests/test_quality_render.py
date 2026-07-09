@@ -1,4 +1,5 @@
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -42,6 +43,34 @@ def test_build_render_document_contains_fields_and_preamble():
     assert "Compute $1+1$." in doc
     assert "$1$" in doc
     assert "Explanation $x$." in doc
+
+
+def test_build_render_document_compiles_clean_record_when_xelatex_exists(tmp_path):
+    import pytest
+    from quality_render import build_render_document
+
+    xelatex = shutil.which("xelatex")
+    if not xelatex:
+        pytest.skip("xelatex not available")
+
+    tex_path = tmp_path / "q1.tex"
+    tex_path.write_text(build_render_document(record("q1")), encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            xelatex,
+            "-interaction=nonstopmode",
+            "-halt-on-error",
+            "-output-directory",
+            str(tmp_path),
+            str(tex_path),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+    assert result.returncode == 0, (result.stdout + result.stderr)[-1000:]
 
 
 def test_render_cache_key_changes_when_content_changes():
