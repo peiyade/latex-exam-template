@@ -102,11 +102,24 @@ def _filter_source_issues(
     if not statuses and not question_ids:
         return issues
 
+    if question_ids:
+        return [issue for issue in issues if _source_issue_matches_question_filter(issue, question_ids)]
+
     selected_ids = {record.id for record in records}
     if not selected_ids:
         return []
 
     return [issue for issue in issues if issue.question_id and issue.question_id in selected_ids]
+
+
+def _source_issue_matches_question_filter(issue, question_ids: list[str]) -> bool:
+    if issue.question_id and issue.question_id in question_ids:
+        return True
+    if not issue.source_path:
+        return False
+
+    source_stem = issue.source_path.stem
+    return any(question_id.rsplit(".", 1)[-1] == source_stem for question_id in question_ids)
 
 
 def _print_summary(records, issues, report_paths) -> None:

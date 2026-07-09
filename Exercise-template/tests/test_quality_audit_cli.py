@@ -160,6 +160,56 @@ def test_cli_question_id_filter_ignores_unrelated_parse_errors(tmp_path):
     assert "source.yaml_parse_error" not in jsonl
 
 
+def test_cli_question_id_filter_keeps_parse_error_for_selected_file(tmp_path):
+    from quality_audit import main
+
+    bank = tmp_path / "bank"
+    output = tmp_path / "analysis"
+    bank.mkdir()
+    write_yaml(
+        bank / "q002.yaml",
+        {
+            "schema_version": 1,
+            "id": "imported.demo.q002",
+            "status": "draft",
+            "type": "solution",
+            "source": {"file": "examples/demo.tex"},
+            "stem_latex": "Compute $2+2$.",
+            "solution_latex": "$4$",
+        },
+    )
+    (bank / "q002.yaml").write_text("id: imported.demo.q002\n  bad_indent: true\n", encoding="utf-8")
+    write_yaml(
+        bank / "q003.yaml",
+        {
+            "schema_version": 1,
+            "id": "imported.demo.q003",
+            "status": "draft",
+            "type": "solution",
+            "source": {"file": "examples/demo.tex"},
+            "stem_latex": "Compute $3+3$.",
+            "solution_latex": "$6$",
+        },
+    )
+
+    code = main(
+        [
+            "--bank",
+            str(bank),
+            "--output-dir",
+            str(output),
+            "--render-mode",
+            "off",
+            "--question-id",
+            "imported.demo.q002",
+        ]
+    )
+
+    assert code == 1
+    jsonl = (output / "quality_audit.jsonl").read_text(encoding="utf-8")
+    assert "source.yaml_parse_error" in jsonl
+
+
 def test_cli_unfiltered_run_fails_on_parse_error(tmp_path):
     from quality_audit import main
 
