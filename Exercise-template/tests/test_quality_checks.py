@@ -57,6 +57,20 @@ def test_choice_checker_requires_exactly_one_correct_choice():
     assert issues[0].severity == "high"
 
 
+def test_choice_checker_flags_malformed_choice_entries():
+    from quality_checks import check_type_consistency
+
+    issues = check_type_consistency(
+        record(
+            type="choice",
+            choices=["bad-choice", {"key": "opt1", "text_latex": "$1$", "correct": True}],
+        )
+    )
+
+    assert "type.choice_malformed_choice" in issue_ids(issues)
+    assert "type.choice_correct_count" not in issue_ids(issues)
+
+
 def test_fillin_checker_matches_blank_keys_to_answer_keys():
     from quality_checks import check_type_consistency
 
@@ -71,6 +85,36 @@ def test_fillin_checker_matches_blank_keys_to_answer_keys():
     assert issues[0].id == "type.fillin_blank_answer_mismatch"
     assert issues[0].severity == "high"
     assert "blank2" in str(issues[0].evidence)
+
+
+def test_fillin_checker_flags_malformed_answer_entries():
+    from quality_checks import check_type_consistency
+
+    issues = check_type_consistency(
+        record(
+            type="fillin",
+            stem_latex=r"Answer \blank{blank1}.",
+            answers=["bad-answer", {"key": "blank1", "latex": "$1$"}],
+        )
+    )
+
+    assert "type.fillin_malformed_answer" in issue_ids(issues)
+
+
+def test_fillin_checker_flags_answers_without_blank_markers():
+    from quality_checks import check_type_consistency
+
+    issues = check_type_consistency(
+        record(
+            type="fillin",
+            stem_latex="Answer the question.",
+            answers=[{"key": "blank1", "latex": "$1$"}],
+        )
+    )
+
+    assert issues[0].id == "type.fillin_blank_answer_mismatch"
+    assert issues[0].severity == "high"
+    assert "blank1" in str(issues[0].evidence)
 
 
 def test_latex_checker_flags_unbalanced_math_and_environment():
@@ -90,6 +134,22 @@ def test_latex_checker_flags_known_broken_command_and_json_wrapper():
 
     assert "latex.jsonish_text_wrapper" in issue_ids(issues)
     assert "latex.broken_command_nmathbb" in issue_ids(issues)
+
+
+def test_latex_fields_skips_malformed_nested_items():
+    from quality_checks import latex_fields
+
+    fields = latex_fields(
+        record(
+            type="choice",
+            choices=["bad-choice", {"key": "opt1", "text_latex": "$1$"}],
+            answers=["bad-answer", {"key": "blank1", "latex": "$2$"}],
+        )
+    )
+
+    assert ("choices[1].text_latex", "$1$") in fields
+    assert ("answers[1].latex", "$2$") in fields
+    assert all("bad-choice" not in text and "bad-answer" not in text for _, text in fields)
 
 
 def test_known_bad_pattern_checker_flags_amm_footer_material():

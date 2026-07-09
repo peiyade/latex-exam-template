@@ -55,10 +55,18 @@ def check_schema(record: QuestionRecord) -> List[QualityIssue]:
 def check_type_consistency(record: QuestionRecord) -> List[QualityIssue]:
     issues: List[QualityIssue] = []
     if record.type == "choice":
+        valid_choices, malformed_issues = _valid_nested_dicts(
+            record,
+            "choices",
+            record.choices,
+            "type.choice_malformed_choice",
+            "Malformed choice entry",
+        )
+        issues.extend(malformed_issues)
         if not record.choices:
             issues.append(_issue(record, "type.choice_missing_choices", "high", "choices", "Choice record has no choices"))
-        correct_count = sum(1 for choice in record.choices if choice.get("correct") is True)
-        if record.choices and correct_count != 1:
+        correct_count = sum(1 for choice in valid_choices if choice.get("correct") is True)
+        if valid_choices and correct_count != 1:
             issues.append(
                 _issue(
                     record,
@@ -69,15 +77,23 @@ def check_type_consistency(record: QuestionRecord) -> List[QualityIssue]:
                     {"correct_count": correct_count},
                 )
             )
-        keys = [str(choice.get("key", "")) for choice in record.choices]
+        keys = [str(choice.get("key", "")) for choice in valid_choices]
         if len(keys) != len(set(keys)):
             issues.append(_issue(record, "type.choice_duplicate_keys", "high", "choices", "Choice keys are not unique", keys))
     if record.type == "fillin":
+        valid_answers, malformed_issues = _valid_nested_dicts(
+            record,
+            "answers",
+            record.answers,
+            "type.fillin_malformed_answer",
+            "Malformed answer entry",
+        )
+        issues.extend(malformed_issues)
         blank_keys = set(BLANK_RE.findall(record.stem_latex))
-        answer_keys = {str(answer.get("key", "")) for answer in record.answers}
+        answer_keys = {str(answer.get("key", "")) for answer in valid_answers}
         if not record.answers:
             issues.append(_issue(record, "type.fillin_missing_answers", "high", "answers", "Fill-in record has no answers"))
-        if blank_keys and blank_keys != answer_keys:
+        if record.answers and (not blank_keys or blank_keys != answer_keys):
             issues.append(
                 _issue(
                     record,
@@ -188,9 +204,11 @@ def latex_fields(record: QuestionRecord) -> List[Tuple[str, str]]:
         ("solution_latex", record.solution_latex),
     ]
     for index, choice in enumerate(record.choices):
-        fields.append((f"choices[{index}].text_latex", str(choice.get("text_latex", ""))))
+        if isinstance(choice, dict):
+            fields.append((f"choices[{index}].text_latex", str(choice.get("text_latex", ""))))
     for index, answer in enumerate(record.answers):
-        fields.append((f"answers[{index}].latex", str(answer.get("latex", ""))))
+        if isinstance(answer, dict):
+            fields.append((f"answers[{index}].latex", str(answer.get("latex", ""))))
     return [(field, text) for field, text in fields if text]
 
 
@@ -216,6 +234,32 @@ def _excerpt(text: str, start: int, radius: int = 80) -> str:
     left = max(0, start - radius)
     right = min(len(text), start + radius)
     return re.sub(r"\s+", " ", text[left:right]).strip()
+
+
+def _valid_nested_dicts(
+    record: QuestionRecord,
+    field_name: str,
+    items: Iterable[object],
+    issue_id: str,
+    message: str,
+) -> tuple[list[dict], list[QualityIssue]]:
+    valid_items: list[dict] = []
+    issues: list[QualityIssue] = []
+    for index, item in enumerate(items):
+        if isinstance(item, dict):
+            valid_items.append(item)
+        else:
+            issues.append(
+                _issue(
+                    record,
+                    issue_id,
+                    "high",
+                    f"{field_name}[{index}]",
+                    message,
+                    item,
+                )
+            )
+    return valid_items, issues
 
 
 def _issue(
