@@ -1,6 +1,7 @@
 .DS_Store
 .temp/
 .pytest_cache/
+.superpowers/
 *.log
 *.out
 *.aux
