@@ -43,6 +43,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def run_audit(args: argparse.Namespace) -> int:
     records, source_issues = load_yaml_bank(args.bank)
     records = _filter_records(records, args.include_status, args.question_id)
+    source_issues = _filter_source_issues(source_issues, records, args.include_status, args.question_id)
 
     rule_issues = run_rule_checks(records)
     render_issues = run_render_checks(
@@ -90,6 +91,22 @@ def _filter_records(
         allowed_ids = set(question_ids)
         selected = [record for record in selected if record.id in allowed_ids]
     return selected
+
+
+def _filter_source_issues(
+    issues,
+    records: list[QuestionRecord],
+    statuses: list[str],
+    question_ids: list[str],
+):
+    if not statuses and not question_ids:
+        return issues
+
+    selected_ids = {record.id for record in records}
+    if not selected_ids:
+        return []
+
+    return [issue for issue in issues if issue.question_id and issue.question_id in selected_ids]
 
 
 def _print_summary(records, issues, report_paths) -> None:

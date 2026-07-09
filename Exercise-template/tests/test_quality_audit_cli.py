@@ -108,3 +108,80 @@ def test_cli_question_id_filter_audits_only_selected_record(tmp_path):
     assert code == 0
     data = json.loads((output / "quality_audit.json").read_text(encoding="utf-8"))
     assert data["summary"]["record_count"] == 1
+
+
+def test_cli_question_id_filter_ignores_unrelated_parse_errors(tmp_path):
+    from quality_audit import main
+
+    bank = tmp_path / "bank"
+    output = tmp_path / "analysis"
+    bank.mkdir()
+    write_yaml(
+        bank / "q001.yaml",
+        {
+            "schema_version": 1,
+            "id": "imported.demo.q001",
+            "status": "draft",
+            "type": "solution",
+            "source": {"file": "examples/demo.tex"},
+            "stem_latex": "Compute $1+1$.",
+            "solution_latex": "$2$",
+        },
+    )
+    write_yaml(
+        bank / "q002.yaml",
+        {
+            "schema_version": 1,
+            "id": "imported.demo.q002",
+            "status": "draft",
+            "type": "solution",
+            "source": {"file": "examples/demo.tex"},
+            "stem_latex": "Compute $2+2$.",
+            "solution_latex": "$4$",
+        },
+    )
+    (bank / "broken.yaml").write_text("id: imported.demo.q999\n  bad_indent: true\n", encoding="utf-8")
+
+    code = main(
+        [
+            "--bank",
+            str(bank),
+            "--output-dir",
+            str(output),
+            "--render-mode",
+            "off",
+            "--question-id",
+            "imported.demo.q002",
+        ]
+    )
+
+    assert code == 0
+    jsonl = (output / "quality_audit.jsonl").read_text(encoding="utf-8")
+    assert "source.yaml_parse_error" not in jsonl
+
+
+def test_cli_unfiltered_run_fails_on_parse_error(tmp_path):
+    from quality_audit import main
+
+    bank = tmp_path / "bank"
+    output = tmp_path / "analysis"
+    bank.mkdir()
+    write_yaml(
+        bank / "q001.yaml",
+        {
+            "schema_version": 1,
+            "id": "imported.demo.q001",
+            "status": "draft",
+            "type": "solution",
+            "source": {"file": "examples/demo.tex"},
+            "stem_latex": "Compute $1+1$.",
+            "solution_latex": "$2$",
+        },
+    )
+    (bank / "broken.yaml").write_text("id: imported.demo.q999\n  bad_indent: true\n", encoding="utf-8")
+
+    code = main(["--bank", str(bank), "--output-dir", str(output), "--render-mode", "off"])
+
+    assert code == 1
+    jsonl = (output / "quality_audit.jsonl").read_text(encoding="utf-8")
+    assert "source.yaml_parse_error" in jsonl
