@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -96,6 +97,54 @@ def test_run_render_checks_reports_failed_compile_with_artifacts(tmp_path):
     assert issues[0].severity == "critical"
     assert "Undefined control sequence" in issues[0].message
     assert issues[0].render_artifacts["tex"].exists()
+
+
+def test_run_render_checks_records_cache_metadata_for_keep_workdir(tmp_path):
+    from quality_render import RenderOptions, build_render_document, render_cache_key, run_render_checks
+
+    def fake_runner(args, **kwargs):
+        tex_path = Path(args[-1])
+        tex_path.with_suffix(".log").write_text("xelatex output", encoding="utf-8")
+        return subprocess.CompletedProcess(args=args, returncode=0, stdout="ok", stderr="")
+
+    options = RenderOptions(mode="full", output_dir=tmp_path, keep_workdir=True)
+    issues = run_render_checks([record("q1")], [], options, runner=fake_runner, which=lambda name: "/usr/bin/xelatex")
+
+    assert issues == []
+
+    document = build_render_document(record("q1"))
+    cache_key = render_cache_key(record("q1"), document)
+    cache = json.loads((options.cache_dir / f"{cache_key}.json").read_text(encoding="utf-8"))
+
+    assert cache["success"] is True
+    assert "timestamp" in cache
+    assert cache["tex_path"].endswith("q1.tex")
+    assert cache["log_path"].endswith("q1.log")
+
+
+def test_run_render_checks_surfaces_warning_only_runs(tmp_path):
+    from quality_render import RenderOptions, run_render_checks
+
+    def fake_runner(*args, **kwargs):
+        return subprocess.CompletedProcess(
+            args=args[0],
+            returncode=0,
+            stdout="LaTeX Warning: Label(s) may have changed.\n",
+            stderr="Package foo Warning: Something is off.\n",
+        )
+
+    issues = run_render_checks(
+        [record("q1")],
+        [],
+        RenderOptions(mode="full", output_dir=tmp_path),
+        runner=fake_runner,
+        which=lambda name: "/usr/bin/xelatex",
+    )
+
+    assert len(issues) == 1
+    assert issues[0].id == "render.warning"
+    assert issues[0].severity == "medium"
+    assert "Warning:" in issues[0].message
 
 
 def test_run_render_checks_uses_cache_after_success(tmp_path):

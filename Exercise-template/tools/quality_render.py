@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import tempfile
+from datetime import datetime, timezone
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
@@ -16,7 +18,8 @@ from quality_checks import latex_fields
 from quality_core import QualityIssue, QuestionRecord, SEVERITY_ORDER
 
 
-TOOL_VERSION = "quality-render-v1"
+TOOL_VERSION = "quality-render-v2"
+WARNING_LINE_RE = re.compile(r"(LaTeX Warning:|Package .+ Warning:)")
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,7 @@ class RenderResult:
     success: bool
     returncode: int
     log_excerpt: str
+    warning_excerpt: str = ""
     tex_path: Optional[Path] = None
     log_path: Optional[Path] = None
 
@@ -114,6 +118,21 @@ def run_render_checks(
         cache_path = options.cache_dir / f"{key}.json"
         cached = _read_cache(cache_path)
         if cached and cached.get("success") is True:
+            warning_excerpt = str(cached.get("warning_excerpt", "")).strip()
+            if warning_excerpt:
+                artifacts = _cached_artifacts(cached)
+                issues.append(
+                    QualityIssue(
+                        id="render.warning",
+                        severity="medium",
+                        question_id=record.id,
+                        field="render",
+                        message=f"xelatex produced warnings: {warning_excerpt}",
+                        evidence={"warning_excerpt": warning_excerpt},
+                        source_path=record.source_path,
+                        render_artifacts=artifacts,
+                    )
+                )
             continue
 
         result = _compile_document(record, document, Path(xelatex), options, runner)
@@ -132,6 +151,24 @@ def run_render_checks(
                     field="render",
                     message=f"LaTeX render failed: {result.log_excerpt}",
                     evidence={"returncode": result.returncode},
+                    source_path=record.source_path,
+                    render_artifacts=artifacts,
+                )
+            )
+        elif result.warning_excerpt:
+            artifacts: Dict[str, Path] = {}
+            if result.tex_path:
+                artifacts["tex"] = result.tex_path
+            if result.log_path:
+                artifacts["log"] = result.log_path
+            issues.append(
+                QualityIssue(
+                    id="render.warning",
+                    severity="medium",
+                    question_id=record.id,
+                    field="render",
+                    message=f"xelatex produced warnings: {result.warning_excerpt}",
+                    evidence={"warning_excerpt": result.warning_excerpt},
                     source_path=record.source_path,
                     render_artifacts=artifacts,
                 )
@@ -174,11 +211,19 @@ def _compile_document(
     except subprocess.TimeoutExpired:
         if cleanup_dir is not None:
             cleanup_dir.cleanup()
-        return RenderResult(False, 124, f"xelatex timed out after {options.timeout_seconds}s", tex_path if options.keep_workdir else None, None)
+        return RenderResult(
+            False,
+            124,
+            f"xelatex timed out after {options.timeout_seconds}s",
+            "",
+            tex_path if options.keep_workdir else None,
+            None,
+        )
 
     log_path = parent / f"{tex_path.stem}.log"
     output = "\n".join([str(getattr(completed, "stdout", "")), str(getattr(completed, "stderr", ""))]).strip()
     excerpt = _log_excerpt(output)
+    warning_excerpt = _warning_excerpt(output)
 
     if cleanup_dir is not None:
         cleanup_dir.cleanup()
@@ -187,6 +232,7 @@ def _compile_document(
         success=completed.returncode == 0,
         returncode=int(completed.returncode),
         log_excerpt=excerpt,
+        warning_excerpt=warning_excerpt,
         tex_path=tex_path if options.keep_workdir else None,
         log_path=log_path if options.keep_workdir and log_path.exists() else None,
     )
@@ -202,16 +248,17 @@ def _read_cache(path: Path) -> Optional[Dict[str, Any]]:
 
 
 def _write_cache(path: Path, result: RenderResult) -> None:
+    payload: Dict[str, Any] = {
+        "success": result.success,
+        "returncode": result.returncode,
+        "log_excerpt": result.log_excerpt,
+        "warning_excerpt": result.warning_excerpt,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "tex_path": str(result.tex_path) if result.tex_path else None,
+        "log_path": str(result.log_path) if result.log_path else None,
+    }
     path.write_text(
-        json.dumps(
-            {
-                "success": result.success,
-                "returncode": result.returncode,
-                "log_excerpt": result.log_excerpt,
-            },
-            ensure_ascii=False,
-            indent=2,
-        )
+        json.dumps(payload, ensure_ascii=False, indent=2)
         + "\n",
         encoding="utf-8",
     )
@@ -224,6 +271,25 @@ def _log_excerpt(output: str, limit: int = 500) -> str:
     if marker in output:
         output = output[output.index(marker) :]
     return output[-limit:]
+
+
+def _warning_excerpt(output: str, limit: int = 500) -> str:
+    warnings = [line.strip() for line in output.splitlines() if WARNING_LINE_RE.search(line)]
+    if not warnings:
+        return ""
+    excerpt = " | ".join(warnings)
+    return excerpt[:limit]
+
+
+def _cached_artifacts(cached: Dict[str, Any]) -> Dict[str, Path]:
+    artifacts: Dict[str, Path] = {}
+    tex_path = str(cached.get("tex_path", "")).strip()
+    log_path = str(cached.get("log_path", "")).strip()
+    if tex_path:
+        artifacts["tex"] = Path(tex_path)
+    if log_path:
+        artifacts["log"] = Path(log_path)
+    return artifacts
 
 
 def _safe_filename(value: str) -> str:
