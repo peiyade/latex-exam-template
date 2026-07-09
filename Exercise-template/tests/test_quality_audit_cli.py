@@ -210,6 +210,52 @@ def test_cli_question_id_filter_keeps_parse_error_for_selected_file(tmp_path):
     assert "source.yaml_parse_error" in jsonl
 
 
+def test_cli_question_id_filter_keeps_nested_parse_error_for_selected_source_slug(tmp_path):
+    from quality_audit import main
+
+    bank = tmp_path / "bank"
+    output = tmp_path / "analysis"
+    bank.mkdir()
+    write_yaml(
+        bank / "q002.yaml",
+        {
+            "schema_version": 1,
+            "id": "imported.demo.q002",
+            "status": "draft",
+            "type": "solution",
+            "source": {"file": "examples/demo.tex"},
+            "stem_latex": "Compute $2+2$.",
+            "solution_latex": "$4$",
+        },
+    )
+    demo_dir = bank / "demo"
+    other_dir = bank / "other"
+    demo_dir.mkdir()
+    other_dir.mkdir()
+    (demo_dir / "q002.yaml").write_text("id: imported.demo.q002\n  bad_indent: true\n", encoding="utf-8")
+    (other_dir / "q002.yaml").write_text("id: imported.other.q002\n  bad_indent: true\n", encoding="utf-8")
+
+    code = main(
+        [
+            "--bank",
+            str(bank),
+            "--output-dir",
+            str(output),
+            "--render-mode",
+            "off",
+            "--question-id",
+            "imported.demo.q002",
+        ]
+    )
+
+    assert code == 1
+    json_payload = json.loads((output / "quality_audit.json").read_text(encoding="utf-8"))
+    jsonl = (output / "quality_audit.jsonl").read_text(encoding="utf-8")
+    assert "demo/q002.yaml" in jsonl
+    assert "other/q002.yaml" not in jsonl
+    assert [issue["source_path"] for issue in json_payload["issues"]] == [str(demo_dir / "q002.yaml")]
+
+
 def test_cli_unfiltered_run_fails_on_parse_error(tmp_path):
     from quality_audit import main
 

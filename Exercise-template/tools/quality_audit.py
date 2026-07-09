@@ -43,7 +43,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def run_audit(args: argparse.Namespace) -> int:
     records, source_issues = load_yaml_bank(args.bank)
     records = _filter_records(records, args.include_status, args.question_id)
-    source_issues = _filter_source_issues(source_issues, records, args.include_status, args.question_id)
+    source_issues = _filter_source_issues(source_issues, records, args.include_status, args.question_id, args.bank)
 
     rule_issues = run_rule_checks(records)
     render_issues = run_render_checks(
@@ -98,12 +98,17 @@ def _filter_source_issues(
     records: list[QuestionRecord],
     statuses: list[str],
     question_ids: list[str],
+    bank_root: Path | None = None,
 ):
     if not statuses and not question_ids:
         return issues
 
     if question_ids:
-        return [issue for issue in issues if _source_issue_matches_question_filter(issue, question_ids)]
+        return [
+            issue
+            for issue in issues
+            if _source_issue_matches_question_filter(issue, question_ids, bank_root=bank_root)
+        ]
 
     selected_ids = {record.id for record in records}
     if not selected_ids:
@@ -112,14 +117,42 @@ def _filter_source_issues(
     return [issue for issue in issues if issue.question_id and issue.question_id in selected_ids]
 
 
-def _source_issue_matches_question_filter(issue, question_ids: list[str]) -> bool:
+def _source_issue_matches_question_filter(issue, question_ids: list[str], bank_root: Path | None = None) -> bool:
     if issue.question_id and issue.question_id in question_ids:
         return True
     if not issue.source_path:
         return False
 
     source_stem = issue.source_path.stem
-    return any(question_id.rsplit(".", 1)[-1] == source_stem for question_id in question_ids)
+    relative_path = None
+    parent_parts: set[str] = set()
+    if bank_root is not None:
+        try:
+            relative_path = issue.source_path.relative_to(bank_root)
+            parent_parts = set(relative_path.parent.parts)
+        except ValueError:
+            relative_path = None
+
+    for question_id in question_ids:
+        parts = question_id.split(".")
+        if len(parts) < 2:
+            continue
+        final_segment = parts[-1]
+        if final_segment != source_stem:
+            continue
+
+        if len(parts) < 3:
+            return True
+
+        source_slug = parts[-2]
+        if bank_root is None:
+            return True
+        if relative_path is not None and not relative_path.parent.parts:
+            return True
+        if source_slug in parent_parts:
+            return True
+
+    return False
 
 
 def _print_summary(records, issues, report_paths) -> None:
